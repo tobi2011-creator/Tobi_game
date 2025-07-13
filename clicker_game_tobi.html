@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Tobi Clicker</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+      background: #fdf6e3;
+      padding: 20px;
+    }
+    h1 { font-size: 2em; }
+    #score { font-size: 1.5em; margin: 10px; }
+    #message { margin: 20px; font-size: 1.4em; color: #007700; }
+    img {
+      width: 200px;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      transition: transform 0.1s ease;
+    }
+    img:active {
+      transform: scale(1.1);
+    }
+    #upgrades {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .upgrade {
+      margin: 5px;
+      padding: 10px;
+      border: 1px solid #aaa;
+      background: #fff;
+      border-radius: 10px;
+      width: 180px;
+      cursor: pointer;
+    }
+    .upgrade:hover {
+      background: #f0f0f0;
+    }
+    .particle {
+      position: absolute;
+      font-size: 20px;
+      animation: pop 1s ease-out;
+      pointer-events: none;
+    }
+    @keyframes pop {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-100px); }
+    }
+    #menu {
+      margin-bottom: 30px;
+    }
+    #leaderboard {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div id="menu">
+    <h1>Tobi Clicker</h1>
+    <button onclick="resetGame()">🔄 Restart</button>
+    <button onclick="saveScore()">💾 Uložit skóre</button>
+    <button onclick="loadScore()">📂 Načíst skóre</button>
+  </div>
+
+  <div id="score">Skóre: 0</div>
+  <img src="https://cdn-icons-png.flaticon.com/512/4712/4712033.png" onclick="clickImage(event)" alt="Click Gamepad">
+  <div id="message"></div>
+  <audio id="clickSound" src="https://freesound.org/data/previews/341/341695_5260877-lq.mp3"></audio>
+  <div id="upgrades"></div>
+
+  <div id="leaderboard">
+    <h2>Top skóre</h2>
+    <ul id="leaderboardList"></ul>
+  </div>
+
+  <script>
+    let score = 0;
+    let clickPower = 1;
+    let autoClickPower = 0;
+    let upgrades = [];
+
+    function clickImage(event) {
+      score += clickPower;
+      updateScore();
+      showMessage();
+      playSound();
+      showParticle(event);
+      checkSurprise();
+    }
+
+    function updateScore() {
+      document.getElementById("score").innerText = "Skóre: " + score.toLocaleString();
+    }
+
+    function showMessage() {
+      let msg = "";
+      if (score >= 1_000_000) msg = "Jsi frajer! / You're awesome! Dostaneš překvápko!";
+      else if (score >= 100_000) msg = "To už fakt jedeš jako mašina!";
+      else if (score >= 10_000) msg = "Už jsi blízko!";
+      else if (score >= 1_000) msg = "To zvládneš!";
+      else if (score >= 100) msg = "To dáš!";
+      document.getElementById("message").innerText = msg;
+    }
+
+    function playSound() {
+      const sound = document.getElementById("clickSound");
+      sound.currentTime = 0;
+      sound.play();
+    }
+
+    function showParticle(e) {
+      const particle = document.createElement("div");
+      particle.className = "particle";
+      particle.innerText = "+" + clickPower;
+      document.body.appendChild(particle);
+      particle.style.left = e.pageX + 'px';
+      particle.style.top = e.pageY + 'px';
+      setTimeout(() => particle.remove(), 1000);
+    }
+
+    function checkSurprise() {
+      if (score >= 1_000_000 && !document.getElementById("surprise")) {
+        const surprise = document.createElement("div");
+        surprise.id = "surprise";
+        surprise.innerHTML = '<h2>🎉 Překvapení! 🎉</h2><p>Dostal ses na vrchol! Jsi fakt frajer!</p><img src="https://media.giphy.com/media/111ebonMs90YLu/giphy.gif" width="300">';
+        document.body.appendChild(surprise);
+        updateLeaderboard();
+      }
+    }
+
+    function buyUpgrade(index) {
+      let upgrade = upgrades[index];
+      if (score >= upgrade.cost) {
+        score -= upgrade.cost;
+        upgrade.level++;
+        if (upgrade.type === "click") clickPower += upgrade.value;
+        else if (upgrade.type === "auto") autoClickPower += upgrade.value;
+        upgrade.cost = Math.floor(upgrade.cost * 1.3);
+        updateScore();
+        updateUpgrades();
+      }
+    }
+
+    function updateUpgrades() {
+      const container = document.getElementById("upgrades");
+      container.innerHTML = "";
+      upgrades.forEach((u, i) => {
+        const div = document.createElement("div");
+        div.className = "upgrade";
+        div.innerHTML = `<strong>${u.name}</strong><br>Úroveň: ${u.level}<br>Cena: ${u.cost}<br>+${u.value} ${u.type === "click" ? "/ klik" : "/ sekundu"}`;
+        div.onclick = () => buyUpgrade(i);
+        container.appendChild(div);
+      });
+    }
+
+    function initUpgrades() {
+      for (let i = 1; i <= 50; i++) {
+        upgrades.push({
+          name: `Klikáč Lv.${i}`,
+          type: "click",
+          value: i,
+          cost: 50 * i,
+          level: 0
+        });
+      }
+      for (let i = 1; i <= 50; i++) {
+        upgrades.push({
+          name: `Autokliker Lv.${i}`,
+          type: "auto",
+          value: i,
+          cost: 100 * i,
+          level: 0
+        });
+      }
+      updateUpgrades();
+    }
+
+    function saveScore() {
+      localStorage.setItem("tobiScore", score);
+    }
+
+    function loadScore() {
+      const saved = localStorage.getItem("tobiScore");
+      if (saved) score = parseInt(saved);
+      updateScore();
+    }
+
+    function resetGame() {
+      score = 0;
+      clickPower = 1;
+      autoClickPower = 0;
+      upgrades = [];
+      document.getElementById("upgrades").innerHTML = "";
+      document.getElementById("message").innerText = "";
+      document.getElementById("surprise")?.remove();
+      initUpgrades();
+      updateScore();
+    }
+
+    function updateLeaderboard() {
+      const list = document.getElementById("leaderboardList");
+      const current = score;
+      const stored = JSON.parse(localStorage.getItem("tobiLeaderboard")) || [];
+      stored.push(current);
+      stored.sort((a,b) => b-a);
+      const top = stored.slice(0,5);
+      localStorage.setItem("tobiLeaderboard", JSON.stringify(top));
+      list.innerHTML = top.map(s => `<li>${s.toLocaleString()}</li>`).join("");
+    }
+
+    setInterval(() => {
+      score += autoClickPower;
+      updateScore();
+      showMessage();
+      checkSurprise();
+    }, 1000);
+
+    initUpgrades();
+    updateLeaderboard();
+  </script>
+</body>
+</html>
