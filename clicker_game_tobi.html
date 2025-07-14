@@ -2,225 +2,2504 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tobi Clicker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Tone.js CDN for sound effects -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
   <style>
     body {
       text-align: center;
-      font-family: 'Segoe UI', sans-serif;
-      background: #fdf6e3;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      color: #333;
     }
-    h1 { font-size: 2em; }
-    #score { font-size: 1.5em; margin: 10px; }
-    #message { margin: 20px; font-size: 1.4em; color: #007700; }
-    img {
-      width: 200px;
+
+    .game-container {
+      background-color: #ffffff;
+      border-radius: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      padding: 30px;
+      margin-bottom: 30px;
+      max-width: 960px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 3em;
+      color: #2c3e50;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    }
+
+    /* Score and Coins Table */
+    .score-display-table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+        background-color: #ecf0f1;
+        border-radius: 15px;
+        overflow: hidden; /* Pro zaoblené rohy */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .score-display-table th, .score-display-table td {
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid #bdc3c7;
+    }
+    .score-display-table th {
+        background-color: #34495e;
+        color: white;
+        font-size: 1.2em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .score-display-table td {
+        font-size: 2em;
+        font-weight: bold;
+        color: #e67e22;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .score-display-table td.coins-cell {
+        color: #f39c12;
+    }
+    .score-display-table td img {
+        width: 30px;
+        height: 30px;
+        vertical-align: middle;
+    }
+    #score.pulse, #coins.pulse {
+      animation: scorePulse 0.2s ease-out;
+    }
+    @keyframes scorePulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+
+    #message {
+      margin: 20px;
+      font-size: 1.6em;
+      color: #27ae60;
+      font-weight: bold;
+      min-height: 1.6em;
+      text-shadow: 0.5px 0.5px 1px rgba(0,0,0,0.1);
+    }
+    .main-click-image-container {
+      width: 280px; /* Increased size */
+      height: 280px; /* Increased size */
       cursor: pointer;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
-      transition: transform 0.1s ease;
+      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+      border-radius: 50%;
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      background-color: #ecf0f1;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px auto;
     }
-    img:active {
-      transform: scale(1.1);
+    .main-click-image-container:active {
+      transform: scale(1.2);
+      box-shadow: 0 0 40px rgba(0,0,0,0.8);
     }
-    #upgrades {
-      margin-top: 30px;
+    .main-click-image-container svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    /* Tabbed Upgrade Sections */
+    .tabs {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+    .tab-button {
+        background: linear-gradient(180deg, #bdc3c7, #95a5a6);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 10px 10px 0 0;
+        cursor: pointer;
+        font-size: 1.2em;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+        margin: 0 5px;
+        flex-grow: 1;
+        max-width: 250px;
+    }
+    .tab-button:hover {
+        background: linear-gradient(180deg, #95a5a6, #bdc3c7);
+        transform: translateY(-3px);
+    }
+    .tab-button.active {
+        background: linear-gradient(180deg, #3498db, #2980b9);
+        color: white;
+        box-shadow: 0 -8px 20px rgba(0,0,0,0.2);
+        transform: translateY(-5px);
+        z-index: 2;
+    }
+
+    .tab-content {
+        display: none;
+        width: 100%;
+        padding: 20px;
+        background-color: #f8f8f8;
+        border-radius: 0 0 20px 20px;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        max-width: 900px;
+    }
+    .tab-content.active {
+        display: block;
+    }
+
+    #upgrades, #premiumUpgradesContent, #petsContent { /* Corrected ID for premium upgrades container */
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
+      gap: 20px;
+      width: 100%;
     }
-    .upgrade {
-      margin: 5px;
-      padding: 10px;
-      border: 1px solid #aaa;
-      background: #fff;
-      border-radius: 10px;
-      width: 180px;
+    .upgrade-card {
+      flex: 1 1 calc(33% - 40px);
+      min-width: 220px;
+      padding: 20px;
+      border: 2px solid #b0b0b0;
+      background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+      border-radius: 18px;
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.18);
+      transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+      font-size: 1em;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
       cursor: pointer;
     }
-    .upgrade:hover {
-      background: #f0f0f0;
+    .upgrade-card:hover {
+      background: linear-gradient(145deg, #e9ecef, #dee2e6);
+      box-shadow: 6px 6px 18px rgba(0,0,0,0.3);
+      transform: translateY(-5px);
     }
+    .upgrade-card.purchased {
+      animation: upgradeBounce 0.3s ease-out;
+    }
+    @keyframes upgradeBounce {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+    .upgrade-card img.upgrade-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .upgrade-card strong {
+      font-size: 1.1em;
+      color: #34495e;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+    .upgrade-card .description {
+      font-size: 0.9em;
+      color: #666;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    .upgrade-card .cost {
+      font-weight: bold;
+      color: #c0392b;
+      font-size: 1.1em;
+      text-align: center;
+    }
+    .upgrade-card .coin-cost {
+      color: #f39c12;
+    }
+
+    .upgrade-category-header {
+      width: 100%;
+      text-align: center;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      font-size: 1.8em;
+      color: #34495e;
+      text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 10px;
+    }
+
     .particle {
       position: absolute;
-      font-size: 20px;
-      animation: pop 1s ease-out;
+      font-size: 24px;
+      font-weight: bold;
+      animation: pop 1s ease-out forwards;
       pointer-events: none;
+      z-index: 1000;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
     }
     @keyframes pop {
-      0% { opacity: 1; transform: translateY(0); }
-      100% { opacity: 0; transform: translateY(-100px); }
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-120px) scale(1.3); }
     }
+
     #menu {
       margin-bottom: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
     }
+    #menu button {
+      background: linear-gradient(180deg, #3498db, #2980b9);
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    #menu button:hover {
+      background: linear-gradient(180deg, #2980b9, #3498db);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    #menu button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    #exchangeCoinsBtn, #treasureChestBtn {
+        background: linear-gradient(180deg, #f39c12, #e67e22);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1.1em;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 20px;
+    }
+    #exchangeCoinsBtn:hover, #treasureChestBtn:hover {
+        background: linear-gradient(180deg, #e67e22, #f39c12);
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    #exchangeCoinsBtn:active, #treasureChestBtn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #treasureChestBtn {
+        background: linear-gradient(180deg, #8e44ad, #9b59b6);
+    }
+    #treasureChestBtn:hover {
+        background: linear-gradient(180deg, #9b59b6, #8e44ad);
+    }
+
+
     #leaderboard {
-      margin-top: 30px;
+      margin-top: 60px;
+      background: linear-gradient(160deg, #ecf0f1, #bdc3c7);
+      border: 3px solid #7f8c8d;
+      border-radius: 25px;
+      padding: 30px 40px;
+      box-shadow: 6px 6px 20px rgba(0,0,0,0.35);
+      max-width: 450px;
+      width: 100%;
+    }
+    #leaderboard h2 {
+      color: #2c3e50;
+      font-size: 2em;
+      margin-bottom: 25px;
+      text-shadow: 1px 1px 3px rgba(255,255,255,0.6);
+    }
+    #leaderboardList {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+    #leaderboardList li {
+      background-color: #ffffff;
+      margin-bottom: 12px;
+      padding: 15px 25px;
+      border-radius: 12px;
+      box-shadow: 1px 1px 7px rgba(0,0,0,0.15);
+      font-size: 1.3em;
+      color: #34495e;
+      font-weight: 600;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #leaderboardList li:hover {
+      transform: translateX(8px);
+      background-color: #f5f5f5;
+    }
+    #leaderboardList li:nth-child(1) {
+        background: linear-gradient(45deg, #FFD700, #FFEA00);
+        color: #8B4513;
+        font-size: 1.4em;
+        box-shadow: 0 0 15px rgba(255,215,0,0.7);
+    }
+    #leaderboardList li:nth-child(2) {
+        background: linear-gradient(45deg, #C0C0C0, #D3D3D3);
+        color: #4F4F4F;
+        font-size: 1.35em;
+        box-shadow: 0 0 12px rgba(192,192,192,0.7);
+    }
+    #leaderboardList li:nth-child(3) {
+        background: linear-gradient(45deg, #CD7F32, #DAA520);
+        color: #6B4226;
+        font-size: 1.3em;
+        box-shadow: 0 0 10px rgba(205,127,50,0.7);
+    }
+
+    #surprise {
+      margin-top: 40px;
+      background-color: #f1c40f;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+      animation: fadeIn 1s ease-out;
+    }
+    #surprise h2 {
+      color: #c0392b;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    #surprise p {
+      font-size: 1.4em;
+      color: #333;
+    }
+    #surprise img {
+      width: 280px;
+      border-radius: 15px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.4);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Nickname Modal Styles */
+    #nicknameModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    #nicknameModalContent {
+      background: linear-gradient(160deg, #ffffff, #f0f0f0);
+      padding: 50px;
+      border-radius: 25px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      max-width: 500px;
+      width: 90%;
+      color: #333;
+    }
+    #nicknameModalContent h2 {
+      font-size: 2.2em;
+      color: #34495e;
+      margin-bottom: 25px;
+    }
+    #nicknameInput {
+      padding: 15px;
+      margin: 25px 0;
+      border-radius: 10px;
+      border: 2px solid #a0a0a0;
+      font-size: 1.3em;
+      width: calc(100% - 30px);
+      max-width: 350px;
+      text-align: center;
+    }
+    #startGameButton {
+      background: linear-gradient(180deg, #2ecc71, #27ae60);
+      color: white;
+      padding: 15px 35px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.2em;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    #startGameButton:hover {
+      background: linear-gradient(180deg, #27ae60, #2ecc71);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    #startGameButton:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #playerNickname {
+      font-size: 1.2em;
+      color: #555;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    /* Tutorial Modal Styles */
+    #tutorialModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      display: none; /* Hidden by default */
+      justify-content: center;
+      align-items: center;
+      z-index: 2100;
+    }
+    #tutorialModalContent {
+      background: linear-gradient(160deg, #e0f2f7, #c1e4ed);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0,0,0,0.6);
+      max-width: 600px;
+      width: 90%;
+      color: #333;
+      position: relative;
+    }
+    #tutorialModalContent h2 {
+      font-size: 2em;
+      color: #2980b9;
+      margin-bottom: 20px;
+    }
+    #tutorialModalContent p {
+      font-size: 1.1em;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+    #tutorialModalContent button {
+      background-color: #3498db;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s ease;
+      margin: 0 10px;
+    }
+    #tutorialModalContent button:hover {
+      background-color: #2980b9;
+    }
+    #tutorialModalContent #skipTutorialBtn {
+      background-color: #e74c3c;
+    }
+    #tutorialModalContent #skipTutorialBtn:hover {
+      background-color: #c0392b;
+    }
+
+    /* Game End Modal */
+    #gameEndModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+    #gameEndModalContent {
+      background: linear-gradient(160deg, #f0f4f8, #d9e2ec);
+      padding: 50px;
+      border-radius: 25px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(0,0,0,0.8);
+      max-width: 600px;
+      width: 90%;
+      color: #2c3e50;
+    }
+    #gameEndModalContent h2 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      color: #27ae60;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
+    #gameEndModalContent p {
+      font-size: 1.5em;
+      margin-bottom: 30px;
+    }
+    #gameEndModalContent button {
+      background: linear-gradient(180deg, #3498db, #2980b9);
+      color: white;
+      padding: 15px 35px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.2em;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    #gameEndModalContent button:hover {
+      background: linear-gradient(180deg, #2980b9, #3498db);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    /* Score Boost Message */
+    #scoreBoostMessage {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(46, 204, 113, 0.9);
+        color: white;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.5em;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 1000;
+        display: none;
+        animation: slideIn 0.5s ease-out;
+    }
+    @keyframes slideIn {
+        from { top: -50px; opacity: 0; }
+        to { top: 20px; opacity: 1; }
+    }
+
+    /* Lucky Wheel Modal */
+    #luckyWheelModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2600;
+    }
+    #luckyWheelModalContent {
+        background: linear-gradient(160deg, #ffe0b2, #ffd180);
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(0,0,0,0.6);
+        max-width: 500px;
+        width: 90%;
+        color: #333;
+    }
+    #luckyWheelModalContent h2 {
+        font-size: 2.2em;
+        color: #e67e22;
+        margin-bottom: 25px;
+    }
+    #luckyWheelModalContent p {
+        font-size: 1.1em;
+        margin-bottom: 25px;
+    }
+    #luckyWheelModalContent button {
+        background-color: #f39c12;
+        color: white;
+        padding: 15px 35px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1.2em;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    #luckyWheelModalContent button:hover {
+        background: linear-gradient(180deg, #e67e22, #f39c12);
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    #luckyWheelModalContent button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #luckyWheelCountdown {
+        font-size: 1.1em;
+        color: #555;
+        margin-top: 15px;
+    }
+
+    /* Meme Display Styles */
+    #memeDisplay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1500;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-width: 90vw;
+      max-height: 90vh;
+    }
+    #memeDisplay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    #memeDisplay img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      object-fit: contain;
+    }
+
+    /* Reward Modal Styles */
+    #rewardModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2500;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    #rewardModal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    #rewardModalContent {
+      background: linear-gradient(160deg, #e0ffe0, #c0ffc0);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+      max-width: 600px;
+      width: 90%;
+      color: #333;
+      position: relative;
+    }
+    #rewardModalContent h2 {
+      font-size: 2em;
+      color: #27ae60;
+      margin-bottom: 20px;
+    }
+    #rewardModalContent p {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+    #rewardModalContent img.reward-icon {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 15px;
+    }
+    #rewardModalContent button {
+      background-color: #3498db;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s ease;
+    }
+    #rewardModalContent button:hover {
+      background-color: #2980b9;
+    }
+
+    /* Responzivní úpravy */
+    @media (max-width: 768px) {
+      h1 { font-size: 2em; }
+      .score-display-table td { font-size: 1.5em; }
+      .score-display-table td img { width: 25px; height: 25px; }
+      #message { font-size: 1.2em; }
+      .main-click-image-container { width: 200px; height: 200px; }
+      .tab-button { padding: 12px 15px; font-size: 1em; }
+      .upgrade-card { flex: 1 1 calc(50% - 30px); }
+      #menu button { padding: 10px 15px; font-size: 0.9em; margin: 5px; }
+      #leaderboard { padding: 20px 25px; }
+      #leaderboard h2 { font-size: 1.5em; }
+      #leaderboardList li { font-size: 1.1em; padding: 10px 15px; }
+      #surprise h2 { font-size: 1.8em; }
+      #surprise p { font-size: 1.1em; }
+      #surprise img { width: 200px; }
+      #nicknameModalContent, #tutorialModalContent, #gameEndModalContent, #luckyWheelModalContent { padding: 30px; }
+      #nicknameInput { font-size: 1em; padding: 10px; }
+      #startGameButton { font-size: 1em; padding: 10px 20px; }
+      #rewardModalContent { padding: 30px; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      .game-container { padding: 20px; border-radius: 15px; }
+      h1 { font-size: 1.8em; }
+      .score-display-table { width: 95%; }
+      .score-display-table td { font-size: 1.2em; }
+      .score-display-table td img { width: 20px; height: 20px; }
+      #message { font-size: 1em; }
+      .main-click-image-container { width: 150px; height: 150px; }
+      .tabs { flex-direction: column; }
+      .tab-button { border-radius: 10px; margin-bottom: 10px; max-width: 100%; }
+      .tab-button.active { transform: translateY(0); }
+      .tab-content { border-radius: 20px; }
+      #upgrades, #premiumUpgradesContent, #petsContent { gap: 10px; }
+      .upgrade-card { flex: 1 1 100%; min-width: auto; }
+      .upgrade-category-header { font-size: 1.5em; margin-top: 20px; margin-bottom: 10px; }
+      #menu button { padding: 8px 12px; font-size: 0.8em; margin: 3px; }
+      #leaderboard { padding: 15px 20px; border-radius: 15px; }
+      #leaderboard h2 { font-size: 1.3em; }
+      #leaderboardList li { font-size: 1em; padding: 8px 12px; }
+      #surprise h2 { font-size: 1.5em; }
+      #surprise p { font-size: 1em; }
+      #surprise img { width: 150px; }
+      #nicknameModalContent, #tutorialModalContent, #gameEndModalContent, #luckyWheelModalContent { padding: 20px; border-radius: 15px; }
+      #nicknameInput { font-size: 0.9em; padding: 8px; }
+      #startGameButton { font-size: 0.9em; padding: 8px 15px; }
+      #rewardModalContent { padding: 20px; }
     }
   </style>
 </head>
 <body>
-  <div id="menu">
-    <h1>Tobi Clicker</h1>
-    <button onclick="resetGame()">🔄 Restart</button>
-    <button onclick="saveScore()">💾 Uložit skóre</button>
-    <button onclick="loadScore()">📂 Načíst skóre</button>
+  <!-- Nickname Input Modal -->
+  <div id="nicknameModal">
+    <div id="nicknameModalContent">
+      <h2>Zadejte své jméno</h2>
+      <input type="text" id="nicknameInput" placeholder="Vaše přezdívka" maxlength="15">
+      <button id="startGameButton">Začít hrát</button>
+    </div>
   </div>
 
-  <div id="score">Skóre: 0</div>
-  <img src="https://cdn-icons-png.flaticon.com/512/4712/4712033.png" onclick="clickImage(event)" alt="Click Gamepad">
-  <div id="message"></div>
-  <audio id="clickSound" src="https://freesound.org/data/previews/341/341695_5260877-lq.mp3"></audio>
-  <div id="upgrades"></div>
+  <!-- Tutorial Modal -->
+  <div id="tutorialModal">
+    <div id="tutorialModalContent">
+      <h2 id="tutorialTitle"></h2>
+      <p id="tutorialText"></p>
+      <button id="tutorialNextBtn">Další</button>
+      <button id="skipTutorialBtn">Přeskočit tutorial</button>
+    </div>
+  </div>
+
+  <!-- Game End Modal -->
+  <div id="gameEndModal">
+    <div id="gameEndModalContent">
+      <h2>Gratuluji!</h2>
+      <p>Dosáhl jsi 999 milionů kliků! Děkujeme za dohrání hry!</p>
+      <button onclick="resetGame()">Hrát znovu</button>
+    </div>
+  </div>
+
+  <div class="game-container">
+    <div id="menu">
+      <h1>Tobi Clicker</h1>
+      <div id="playerNickname"></div>
+      <button onclick="resetGame()">🔄 Restart</button>
+      <button onclick="saveGame()">💾 Uložit hru</button>
+      <button onclick="loadGame()">📂 Načíst hru</button>
+    </div>
+
+    <!-- Score and Coins Display Table -->
+    <table class="score-display-table" id="scoreDisplayTable">
+        <thead>
+            <tr>
+                <th>Skóre</th>
+                <th>Coiny</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="score">0</td>
+                <td id="coins" class="coins-cell">0 <i class="fa-solid fa-coins" style="color: #f39c12;"></i></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="main-click-image-container" id="mainClicker" onclick="clickImage(event)">
+        <!-- Inline SVG Gamepad -->
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM3.5 12C3.5 7.305 7.305 3.5 12 3.5C16.695 3.5 20.5 7.305 20.5 12C20.5 16.695 16.695 20.5 12 20.5C7.305 20.5 3.5 16.695 3.5 12Z" fill="#34495e"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10.5 8.5H8.5V10.5H10.5V8.5ZM10.5 13.5H8.5V15.5H10.5V13.5ZM13.5 8.5H15.5V10.5H13.5V8.5ZM13.5 13.5H15.5V15.5H13.5V13.5Z" fill="#2c3e50"/>
+            <path d="M7 12.5H5V11.5H7V12.5ZM19 12.5H17V11.5H19V12.5Z" fill="#2c3e50"/>
+            <path d="M12.5 7H11.5V5H12.5V7ZM12.5 19H11.5V17H12.5V19Z" fill="#2c3e50"/>
+            <circle cx="9" cy="12" r="1.5" fill="#e74c3c"/>
+            <circle cx="15" cy="12" r="1.5" fill="#2ecc71"/>
+            <circle cx="12" cy="9" r="1.5" fill="#f1c40f"/>
+            <circle cx="12" cy="15" r="1.5" fill="#3498db"/>
+        </svg>
+    </div>
+    <div id="message"></div>
+    <button id="exchangeCoinsBtn" onclick="exchangeClicksForCoins()">Vyměnit 5000 kliků za 25 Coinů <i class="fa-solid fa-coins"></i></button>
+    <button id="treasureChestBtn" onclick="openTreasureChest()">Otevřít truhlu (10 000 kliků) <i class="fa-solid fa-box"></i></button>
+
+
+    <!-- Tabbed Upgrade Sections -->
+    <div class="tabs">
+        <button class="tab-button active" onclick="openTab(event, 'normalUpgrades')">Vylepšení</button>
+        <button class="tab-button" onclick="openTab(event, 'premiumUpgrades')">Prémium vylepšení</button>
+        <button class="tab-button" onclick="openTab(event, 'petsUpgrades')">Mazlíčci</button>
+    </div>
+
+    <div id="normalUpgrades" class="tab-content active">
+      <div id="upgrades"></div>
+    </div>
+
+    <div id="premiumUpgrades" class="tab-content">
+      <div id="premiumUpgradesContent"></div>
+    </div>
+
+    <div id="petsUpgrades" class="tab-content">
+      <div id="petsContent"></div>
+    </div>
+  </div>
 
   <div id="leaderboard">
     <h2>Top skóre</h2>
     <ul id="leaderboardList"></ul>
   </div>
 
+  <!-- Score Boost Message -->
+  <div id="scoreBoostMessage"></div>
+
+  <!-- Lucky Wheel Modal -->
+  <div id="luckyWheelModal">
+    <div id="luckyWheelModalContent">
+      <h2>Kolo štěstí!</h2>
+      <p>Máš šanci vyhrát skvělé odměny!</p>
+      <button id="spinWheelBtn">Roztočit kolo!</button>
+      <p id="luckyWheelCountdown"></p>
+    </div>
+  </div>
+
+  <!-- Meme Display -->
+  <div id="memeDisplay"></div>
+
+  <!-- Reward Modal -->
+  <div id="rewardModal">
+    <div id="rewardModalContent">
+      <img id="rewardIcon" class="reward-icon" src="" alt="Reward Icon">
+      <h2 id="rewardTitle"></h2>
+      <p id="rewardMessage"></p>
+      <button onclick="hideRewardModal()">OK</button>
+    </div>
+  </div>
+
   <script>
     let score = 0;
+    let coins = 0;
     let clickPower = 1;
     let autoClickPower = 0;
+    let critChance = 0.05;
+    let critDamageMultiplier = 2;
+    let costReductionPercentage = 0;
     let upgrades = [];
+    let premiumUpgrades = [];
+    let pets = []; // New array for pets
+    let nickname = "Hráč";
+    let lastMessageThreshold = 0;
 
+    let scoreMultiplier = 1; // For 2x score events
+    let scoreBoostEndTime = 0;
+    let scoreBoostIntervalId;
+
+    let lastSpinTime = 0;
+    const luckyWheelCooldown = 60 * 60 * 1000; // 1 hour
+    let luckyWheelCheckIntervalId;
+
+    let lastChestOpenTime = 0;
+    const treasureChestCooldown = 10 * 60 * 1000; // 10 minutes
+    const treasureChestCost = 10000;
+
+    const coinExchangeRate = { clicks: 5000, coins: 25 };
+    const gameEndScore = 999000000; // Game ends at 999 million
+
+    const particleColors = ['#2ecc71', '#3498db', '#e74c3c', '#f1c40f', '#9b59b6'];
+
+    // Initialize Tone.js synths
+    let clickSynth;
+    let upgradeSynth;
+    let rewardSynth;
+    let audioContextInitialized = false;
+
+    // Function to initialize Tone.js audio context
+    function initializeAudioContext() {
+        if (!audioContextInitialized) {
+            Tone.start();
+            clickSynth = new Tone.PluckSynth().toDestination();
+            upgradeSynth = new Tone.Synth({
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.2 }
+            }).toDestination();
+            rewardSynth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.02, decay: 0.2, sustain: 0.1, release: 0.3 }
+            }).toDestination();
+            audioContextInitialized = true;
+        }
+    }
+
+    // Placeholder ikony pro vylepšení
+    const upgradeIcons = {
+        "click": "https://placehold.co/60x60/3498db/FFFFFF?text=KLIK",
+        "auto": "https://placehold.co/60x60/2ecc71/FFFFFF?text=AUTO",
+        "click_multiplier": "https://placehold.co/60x60/9b59b6/FFFFFF?text=XKLIK",
+        "auto_multiplier": "https://placehold.co/60x60/e67e22/FFFFFF?text=XAUTO",
+        "crit_chance": "https://placehold.co/60x60/c0392b/FFFFFF?text=CRIT%",
+        "crit_damage": "https://placehold.co/60x60/f1c40f/000000?text=CRITx",
+        "cost_reduction": "https://placehold.co/60x60/7f8c8d/FFFFFF?text=SLEVA",
+        "luck_boost": "https://placehold.co/60x60/FFD700/000000?text=ŠTĚSTÍ",
+        "time_warp": "https://placehold.co/60x60/8e44ad/FFFFFF?text=ČAS",
+        "passive_coin_gen": "https://placehold.co/60x60/f39c12/FFFFFF?text=COIN+",
+        "premium_click": "https://placehold.co/60x60/FFD700/000000?text=P+KLIK",
+        "premium_auto": "https://placehold.co/60x60/FFD700/000000?text=P+AUTO",
+        "premium_crit": "https://placehold.co/60x60/FFD700/000000?text=P+CRIT",
+        "premium_coin_bonus": "https://placehold.co/60x60/FFD700/000000?text=P+COIN",
+        "premium_all_boost": "https://placehold.co/60x60/FFD700/000000?text=P+ALL"
+    };
+
+    const petIcons = {
+        "dog": "https://placehold.co/60x60/8B4513/FFFFFF?text=PES",
+        "cat": "https://placehold.co/60x60/9C27B0/FFFFFF?text=KOČKA",
+        "dragon": "https://placehold.co/60x60/F44336/FFFFFF?text=DRAK",
+        "owl": "https://placehold.co/60x60/607D8B/FFFFFF?text=SOVA",
+        "fox": "https://placehold.co/60x60/FF5722/FFFFFF?text=LIŠKA",
+        "unicorn": "https://placehold.co/60x60/E91E63/FFFFFF?text=JEDNOROŽEC",
+        "robot": "https://placehold.co/60x60/607D8B/FFFFFF?text=ROBOT",
+        "squirrel": "https://placehold.co/60x60/795548/FFFFFF?text=VEVERKA",
+        "panda": "https://placehold.co/60x60/000000/FFFFFF?text=PANDA",
+        "wolf": "https://placehold.co/60x60/424242/FFFFFF?text=VLK",
+        "rabbit": "https://placehold.co/60x60/9E9E9E/000000?text=KRÁLÍK",
+        "turtle": "https://placehold.co/60x60/4CAF50/FFFFFF?text=ŽELVA",
+        "phoenix": "https://placehold.co/60x60/FF9800/FFFFFF?text=FÉNIX",
+        "slime": "https://placehold.co/60x60/8BC34A/FFFFFF?text=SLIZ",
+        "golem": "https://placehold.co/60x60/795548/FFFFFF?text=GOLEM",
+        "spirit": "https://placehold.co/60x60/B2EBF2/000000?text=DUCH",
+        "bee": "https://placehold.co/60x60/FFEB3B/000000?text=VČELA",
+        "spider": "https://placehold.co/60x60/333333/FFFFFF?text=PAVOUK",
+        "dolphin": "https://placehold.co/60x60/03A9F4/FFFFFF?text=DELFÍN",
+        "chameleon": "https://placehold.co/60x60/CDDC39/000000?text=CHAMELEON",
+        "elephant": "https://placehold.co/60x60/B0BEC5/000000?text=SLON",
+        "lion": "https://placehold.co/60x60/FFC107/000000?text=LEV",
+        "penguin": "https://placehold.co/60x60/2196F3/FFFFFF?text=TUČŇÁK",
+        "bat": "https://placehold.co/60x60/673AB7/FFFFFF?text=NETOPÝR",
+        "octopus": "https://placehold.co/60x60/9C27B0/FFFFFF?text=CHOBOTNICE"
+    };
+
+
+    const motivationalMessages = [
+      { threshold: 100, msg: "To dáš! Jen tak dál!" },
+      { threshold: 500, msg: "Skvěle! Každé kliknutí se počítá!" },
+      { threshold: 1000, msg: "Už jsi tisícovník! Gratuluji!" },
+      { threshold: 2000, msg: "Jde ti to skvěle! Cesta k milionům je otevřená!" },
+      { threshold: 5000, msg: "Pět tisíc! Jsi nezastavitelný!" },
+      { threshold: 10000, msg: "Deset tisíc! Už jsi blízko k velkým číslům!" },
+      { threshold: 15000, msg: "Patnáct tisíc! Rychle se zlepšuješ!" },
+      { threshold: 20000, msg: "Dvacet tisíc! Jsi super!" },
+      { threshold: 25000, msg: "Čtvrtina cesty k padesáti tisícům! Makáš!" },
+      { threshold: 30000, msg: "Třicet tisíc! Skvěle ti to jde!" },
+      { threshold: 35000, msg: "Třicet pět tisíc! Jsi na správné vlně!" },
+      { threshold: 40000, msg: "Čtyřicet tisíc! Jen tak dál!" },
+      { threshold: 45000, msg: "Čtyřicet pět tisíc! Cíl je na dohled!" },
+      { threshold: 50000, msg: "Padesát tisíc! Jsi na správné cestě!" },
+      { threshold: 55000, msg: "Padesát pět tisíc! Tvé prsty jsou rychlejší než tvůj stín!" },
+      { threshold: 60000, msg: "Šedesát tisíc! Úžasné tempo!" },
+      { threshold: 65000, msg: "Šedesát pět tisíc! Jsi nezastavitelný!" },
+      { threshold: 70000, msg: "Sedmdesát tisíc! Držíš se skvěle!" },
+      { threshold: 75000, msg: "Sedmdesát pět tisíc! Jsi mistr klikání!" },
+      { threshold: 80000, msg: "Osmdesát tisíc! Jsi blízko k dalšímu milníku!" },
+      { threshold: 85000, msg: "Osmdesát pět tisíc! Tvé kliky jsou hypnotizující!" },
+      { threshold: 90000, msg: "Devadesát tisíc! Skvělá práce!" },
+      { threshold: 95000, msg: "Devadesát pět tisíc! Už to skoro je!" },
+      { threshold: 100000, msg: "Sto tisíc! To už fakt jedeš jako mašina!" },
+      { threshold: 110000, msg: "Sto deset tisíc! Tvé kliky jsou jako déšť!" },
+      { threshold: 120000, msg: "Sto dvacet tisíc! Jsi neuvěřitelný!" },
+      { threshold: 130000, msg: "Sto třicet tisíc! Jsi klikací superhrdina!" },
+      { threshold: 140000, msg: "Sto čtyřicet tisíc! Tvé skóre je astronomické!" },
+      { threshold: 150000, msg: "Sto padesát tisíc! Tvé prsty jsou zlaté!" },
+      { threshold: 160000, msg: "Jeden milion šest set tisíc! Takhle se to dělá!" },
+      { threshold: 170000, msg: "Jeden milion sedm set tisíc! Jsi génius klikání!" },
+      { threshold: 180000, msg: "Jeden milion osm set tisíc! Tvé skóre je jako lavina!" },
+      { threshold: 190000, msg: "Jeden milion devět set tisíc! Už jsi skoro u dvou milionů!" },
+      { threshold: 200000, msg: "Dva miliony! Jsi nezastavitelná síla přírody!" },
+      { threshold: 210000, msg: "Dva miliony sto tisíc! Tvé kliky jsou nekonečné!" },
+      { threshold: 220000, msg: "Dva miliony dvě stě tisíc! Jsi klikací mašina!" },
+      { threshold: 230000, msg: "Dva miliony tři sta tisíc! Jsi nezastavitelný fenomén!" },
+      { threshold: 240000, msg: "Dva miliony čtyři sta tisíc! Tvé skóre je umělecké dílo!" },
+      { threshold: 250000, msg: "Dva miliony pět set tisíc! Jsi na vrcholu!" },
+      { threshold: 260000, msg: "Dva miliony šest set tisíc! Jsi prostě nejlepší!" },
+      { threshold: 270000, msg: "Dva miliony sedm set tisíc! Tvé prsty jsou z oceli!" },
+      { threshold: 280000, msg: "Dva miliony osm set tisíc! Blížíš se k třiceti!" },
+      { threshold: 290000, msg: "Dva miliony devět set tisíc! Už jen kousek!" },
+      { threshold: 300000, msg: "Tři miliony! Jsi král/královna klikání!" },
+      { threshold: 310000, msg: "Tři miliony sto tisíc! Tvé kliky jsou zlaté!" },
+      { threshold: 320000, msg: "Tři miliony dvě stě tisíc! Jsi jako švýcarské hodinky, přesný a rychlý!" },
+      { threshold: 330000, msg: "Tři miliony tři sta tisíc! Jsi na cestě k nesmrtelnosti!" },
+      { threshold: 340000, msg: "Tři miliony čtyři sta tisíc! Kdo by to byl řekl, že klikání je taková věda?" },
+      { threshold: 350000, msg: "Tři miliony pět set tisíc! Jsi klikací guru!" },
+      { threshold: 360000, msg: "Tři miliony šest set tisíc! Jsi nezastavitelná síla!" },
+      { threshold: 370000, msg: "Tři miliony sedm set tisíc! Tvé skóre je epické!" },
+      { threshold: 380000, msg: "Tři miliony osm set tisíc! Jsi klikací titán!" },
+      { threshold: 390000, msg: "Tři miliony devět set tisíc! Už jsi skoro u čtyřiceti!" },
+      { threshold: 400000, msg: "Čtyři miliony! Úžasné tempo!" },
+      { threshold: 410000, msg: "Čtyři miliony sto tisíc! Jsi prostě úžasný!" },
+      { threshold: 420000, msg: "Čtyři miliony dvě stě tisíc! Tvé kliky jsou nekonečné!" },
+      { threshold: 430000, msg: "Čtyři miliony tři sta tisíc! Jsi klikací superhrdina!" },
+      { threshold: 440000, msg: "Čtyři miliony čtyři sta tisíc! Tvé skóre je astronomické!" },
+      { threshold: 450000, msg: "Čtyři miliony pět set tisíc! Jsi legenda, která kliká!" },
+      { threshold: 460000, msg: "Čtyři miliony šest set tisíc! Takhle se to dělá!" },
+      { threshold: 470000, msg: "Čtyři miliony sedm set tisíc! Jsi génius klikání!" },
+      { threshold: 480000, msg: "Čtyři miliony osm set tisíc! Tvé skóre je jako lavina!" },
+      { threshold: 490000, msg: "Čtyři miliony devět set tisíc! Už jsi skoro u padesáti!" },
+      { threshold: 500000, msg: "Pět milionů! Neuvěřitelné! Jsi mistr klikání!" },
+      { threshold: 510000, msg: "Pět milionů sto tisíc! Jsi na vrcholu klikacího světa!" },
+      { threshold: 520000, msg: "Pět milionů dvě stě tisíc! Mistrovství v klikání!" },
+      { threshold: 530000, msg: "Pět milionů tři sta tisíc! Tvé skóre je ohromující!" },
+      { threshold: 540000, msg: "Pět milionů čtyři sta tisíc! Blížíš se k vrcholu!" },
+      { threshold: 550000, msg: "Pět milionů pět set tisíc! Jsi klikací legenda!" },
+      { threshold: 560000, msg: "Pět milionů šest set tisíc! Jsi jako stroj!" },
+      { threshold: 570000, msg: "Pět milionů sedm set tisíc! Tvé kliky jsou nekonečné!" },
+      { threshold: 580000, msg: "Pět milionů osm set tisíc! Jediná věc, co kliká víc než ty, je tvoje myš!" },
+      { threshold: 590000, msg: "Pět milionů devět set tisíc! Poslední krok k šedesáti milionům!" },
+      { threshold: 600000, msg: "Šest milionů! Mistrovství v klikání!" },
+      { threshold: 610000, msg: "Šedesát jedna milionů! Jsi prostě úžasný!" },
+      { threshold: 620000, msg: "Šedesát dva milionů! Tvé kliky jsou nekonečné!" },
+      { threshold: 630000, msg: "Šedesát tři milionů! Jsi klikací superhrdina!" },
+      { threshold: 640000, msg: "Šedesát čtyři milionů! Tvé skóre je astronomické!" },
+      { threshold: 650000, msg: "Šedesát pět milionů! Jsi legenda, která kliká!" },
+      { threshold: 660000, msg: "Šedesát šest milionů! Takhle se to dělá!" },
+      { threshold: 670000, msg: "Šedesát sedm milionů! Jsi génius klikání!" },
+      { threshold: 680000, msg: "Šedesát osm milionů! Tvé skóre je jako lavina!" },
+      { threshold: 690000, msg: "Šedesát devět milionů! Už jsi skoro u sedmdesáti!" },
+      { threshold: 700000, msg: "Sedmdesát milionů! Blížíš se k vrcholu!" },
+      { threshold: 710000, msg: "Sedmdesát jedna milionů! Jsi prostě úžasný!" },
+      { threshold: 720000, msg: "Sedmdesát dva milionů! Tvé kliky jsou nekonečné!" },
+      { threshold: 730000, msg: "Sedmdesát tři milionů! Jsi klikací superhrdina!" },
+      { threshold: 740000, msg: "Sedmdesát čtyři milionů! Tvé skóre je astronomické!" },
+      { threshold: 750000, msg: "Sedmdesát pět milionů! Jsi legenda, která kliká!" },
+      { threshold: 760000, msg: "Sedmdesát šest milionů! Takhle se to dělá!" },
+      { threshold: 770000, msg: "Sedmdesát sedm milionů! Jsi génius klikání!" },
+      { threshold: 780000, msg: "Sedmdesát osm milionů! Tvé skóre je jako lavina!" },
+      { threshold: 790000, msg: "Sedmdesát devět milionů! Už jsi skoro u osmdesáti!" },
+      { threshold: 800000, msg: "Osmdesát milionů! Jsi jako stroj!" },
+      { threshold: 810000, msg: "Osmdesát jedna milionů! Jsi prostě úžasný!" },
+      { threshold: 820000, msg: "Osmdesát dva milionů! Tvé kliky jsou nekonečné!" },
+      { threshold: 830000, msg: "Osmdesát tři milionů! Jsi klikací superhrdina!" },
+      { threshold: 840000, msg: "Osmdesát čtyři milionů! Tvé skóre je astronomické!" },
+      { threshold: 850000, msg: "Osmdesát pět milionů! Jsi legenda, která kliká!" },
+      { threshold: 860000, msg: "Osmdesát šest milionů! Takhle se to dělá!" },
+      { threshold: 870000, msg: "Osmdesát sedm milionů! Jsi génius klikání!" },
+      { threshold: 880000, msg: "Osmdesát osm milionů! Tvé skóre je jako lavina!" },
+      { threshold: 890000, msg: "Osmdesát devět milionů! Už jsi skoro u devadesáti!" },
+      { threshold: 900000, msg: "Devadesát milionů! Legendární výkon!" },
+      { threshold: 910000, msg: "Devadesát jedna milionů! Jsi prostě úžasný!" },
+      { threshold: 920000, msg: "Devadesát dva milionů! Tvé kliky jsou nekonečné!" },
+      { threshold: 930000, msg: "Devadesát tři milionů! Jsi klikací superhrdina!" },
+      { threshold: 940000, msg: "Devadesát čtyři milionů! Tvé skóre je astronomické!" },
+      { threshold: 950000, msg: "Devadesát pět milionů! Poslední krok k absolutní dominanci!" },
+      { threshold: 960000, msg: "Devadesát šest milionů! Takhle se to dělá!" },
+      { threshold: 970000, msg: "Devadesát sedm milionů! Jsi génius klikání!" },
+      { threshold: 980000, msg: "Devadesát osm milionů! Tvé skóre je jako lavina!" },
+      { threshold: 990000, msg: "Absolutní dominace! Jsi nezastavitelný!" },
+      { threshold: 100000000, msg: "Sto milionů! Jsi Bůh klikání! Nic už tě nezastaví!" },
+    ];
+
+    // Seznam URL pro meme obrázky (200 unikátních placeholderů)
+    const memeImages = [];
+    for (let i = 1; i <= 200; i++) {
+        const color1 = Math.floor(Math.random()*16777215).toString(16);
+        const color2 = Math.floor(Math.random()*16777215).toString(16);
+        memeImages.push(`https://placehold.co/400x300/${color1}/${color2}?text=Meme+${i}`);
+    }
+
+    let shuffledMemeImages = [];
+    let currentMemeIndex = 0;
+    let memeIntervalId;
+    let memeTimeoutId;
+
+    // Opakovatelné drobné odměny (pool 30 druhů)
+    const minorRepeatableRewards = [
+        { type: 'click_power', value: 5, message: 'Malý bonus k síle kliku!', icon: upgradeIcons.click },
+        { type: 'auto_power', value: 2, message: 'Malý bonus k autokliku!', icon: upgradeIcons.auto },
+        { type: 'coins', value: 5, message: 'Získal jsi 5 Coinů!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C' },
+        { type: 'click_power', value: 10, message: 'Střední bonus k síle kliku!', icon: upgradeIcons.click },
+        { type: 'auto_power', value: 5, message: 'Střední bonus k autokliku!', icon: upgradeIcons.auto },
+        { type: 'coins', value: 10, message: 'Získal jsi 10 Coinů!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C' },
+        { type: 'click_multiplier', value: 0.01, message: 'Malý násobič kliků!', icon: upgradeIcons.click_multiplier },
+        { type: 'auto_multiplier', value: 0.01, message: 'Malý násobič autokliků!', icon: upgradeIcons.auto_multiplier },
+        { type: 'crit_chance', value: 0.005, message: 'Mírné zvýšení kritické šance!', icon: upgradeIcons.crit_chance },
+        { type: 'crit_damage', value: 0.1, message: 'Mírné zvýšení kritického poškození!', icon: upgradeIcons.crit_damage },
+        { type: 'coins', value: 15, message: 'Získal jsi 15 Coinů!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C' },
+        { type: 'click_power', value: 7, message: 'Bonus k síle kliku!', icon: upgradeIcons.click },
+        { type: 'auto_power', value: 3, message: 'Bonus k autokliku!', icon: upgradeIcons.auto },
+        { type: 'coins', value: 8, message: 'Získal jsi 8 Coinů!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C' },
+        { type: 'click_power', value: 12, message: 'Výrazný bonus k síle kliku!', icon: upgradeIcons.click },
+        { type: 'auto_power', value: 6, message: 'Výrazný bonus k autokliku!', icon: upgradeIcons.auto },
+        { type: 'coins', value: 12, message: 'Získal jsi 12 Coinů!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C' },
+        { type: 'click_multiplier', value: 0.02, message: 'Střední násobič kliků!', icon: upgradeIcons.click_multiplier },
+        { type: 'auto_multiplier', value: 0.02, message: 'Střední násobič autokliků!', icon: upgradeIcons.auto_multiplier },
+        { type: 'crit_chance', value: 0.01, message: 'Zvýšení kritické šance!', icon: upgradeIcons.crit_chance },
+        { type: 'crit_damage', value: 0.2, message: 'Zvýšení kritického poškození!', icon: upgradeIcons.crit_damage },
+        { type: 'coins', value: 20, message: 'Získal jsi 20 Coinů!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C' },
+        { type: 'click_power', value: 15, message: 'Velký bonus k síle kliku!', icon: upgradeIcons.click },
+        { type: 'auto_power', value: 8, message: 'Velký bonus k autokliku!', icon: upgradeIcons.auto },
+        { type: 'coins', value: 25, message: 'Získal jsi 25 Coinů!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C' },
+        { type: 'click_multiplier', value: 0.03, message: 'Velký násobič kliků!', icon: upgradeIcons.click_multiplier },
+        { type: 'auto_multiplier', value: 0.03, message: 'Velký násobič autokliků!', icon: upgradeIcons.auto_multiplier },
+        { type: 'crit_chance', value: 0.015, message: 'Výrazné zvýšení kritické šance!', icon: upgradeIcons.crit_chance },
+        { type: 'crit_damage', value: 0.3, message: 'Výrazné zvýšení kritického poškození!', icon: upgradeIcons.crit_damage },
+        { type: 'coins', value: 30, message: 'Získal jsi 30 Coinů!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C' }
+    ];
+    let lastMinorRewardThreshold = 0; // Pro sledování opakovatelných odměn
+
+    // Hlavní milníky a nápady jako odměny (jednorázové)
+    const majorMilestoneRewards = [
+        { id: 'surprise1M', threshold: 1_000_000, type: 'surprise', message: 'Dostal ses na vrchol! Jsi fakt frajer!', icon: 'https://media.giphy.com/media/111ebonMs90YLu/giphy.gif', claimed: false },
+        { id: 'idea1', threshold: 1_000_000, type: 'idea', title: 'Nápad: Prestige systém', message: 'Co takhle systém prestiže? Resetuješ hru, ale získáš trvalé bonusy!', icon: 'https://placehold.co/60x60/8e44ad/FFFFFF?text=IDEA', claimed: false },
+        { id: 'coins100', threshold: 5_000_000, type: 'coins', value: 100, message: 'Obrovský bonus 100 Coinů za 5 milionů kliků!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C', claimed: false },
+        { id: 'idea2', threshold: 10_000_000, type: 'idea', title: 'Nápad: Minihry a události', message: 'Co kdyby se občas objevily minihry nebo speciální události pro extra bonusy?', icon: 'https://placehold.co/60x60/8e44ad/FFFFFF?text=IDEA', claimed: false },
+        { id: 'allBoost1', threshold: 25_000_000, type: 'all_boost', value: 0.1, message: 'Všechny tvé bonusy jsou nyní o 10% silnější!', icon: 'https://placehold.co/60x60/2c3e50/FFFFFF?text=ALL', claimed: false },
+        { id: 'idea3', threshold: 50_000_000, type: 'idea', title: 'Nápad: Achievmenty', message: 'Systém úspěchů by mohl odemykat kosmetiku nebo speciální bonusy!', icon: 'https://placehold.co/60x60/8e44ad/FFFFFF?text=IDEA', claimed: false },
+        { id: 'coins500', threshold: 75_000_000, type: 'coins', value: 500, message: 'Masivní bonus 500 Coinů za 75 milionů kliků!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C', claimed: false },
+        { id: 'idea4', threshold: 100_000_000, type: 'idea', title: 'Nápad: Obchod s kosmetikou', message: 'Co takhle utrácet Coiny za různé vzhledy a efekty?', icon: 'https://placehold.co/60x60/8e44ad/FFFFFF?text=IDEA', claimed: false },
+        { id: 'finalBoost', threshold: 150_000_000, type: 'all_boost', value: 0.2, message: 'Jsi nezastavitelný! Všechny bonusy +20%!', icon: 'https://placehold.co/60x60/2c3e50/FFFFFF?text=FINAL', claimed: false },
+        { id: 'idea5', threshold: 200_000_000, type: 'idea', title: 'Nápad: Offline progrese', message: 'Co kdyby hra generovala skóre, i když nejsi online?', icon: 'https://placehold.co/60x60/8e44ad/FFFFFF?text=IDEA', claimed: false },
+    ];
+    let claimedMajorMilestones = {}; // Sledování jednorázových milníků
+
+    // Tutorial steps definition
+    const tutorialSteps = [
+        {
+            title: "Vítej v Tobi Clickeru!",
+            text: "Cílem hry je klikat na gamepad a získávat skóre. Čím více klikáš, tím jsi lepší!",
+            highlightElementId: "mainClicker"
+        },
+        {
+            title: "Získej vylepšení!",
+            text: "Za nasbírané skóre si můžeš koupit vylepšení, která zvýší tvou sílu kliku nebo přidají autokliky. Najdeš je pod záložkou 'Vylepšení'.",
+            highlightElementId: "normalUpgrades"
+        },
+        {
+            title: "Prémium vylepšení a Coiny",
+            text: "Některá vylepšení jsou prémiová a kupují se za Coiny. Coiny můžeš získat výměnou za kliky nebo jako odměnu za milníky. Prémium vylepšení jsou velmi silná!",
+            highlightElementId: "premiumUpgrades"
+        },
+        {
+            title: "Výměna kliků za Coiny",
+            text: "Použij tlačítko 'Vyměnit kliky za Coiny' k získání prémiové měny. Je to klíč k těm nejlepším vylepšením!",
+            highlightElementId: "exchangeCoinsBtn"
+        },
+        {
+            title: "Sleduj své skóre!",
+            text: "Tvé skóre a coiny jsou zobrazeny nahoře. Snaž se dostat na vrchol žebříčku!",
+            highlightElementId: "scoreDisplayTable"
+        },
+        {
+            title: "Mazlíčci",
+            text: "V záložce 'Mazlíčci' si můžeš pořídit roztomilé společníky, kteří ti poskytnou speciální bonusy a schopnosti!",
+            highlightElementId: "petsUpgrades"
+        },
+        {
+            title: "Ukládání a načítání",
+            text: "Nezapomeň si hru ukládat, abys nepřišel/a o svůj pokrok! Můžeš ji také kdykoli restartovat.",
+            highlightElementId: "menu"
+        },
+        {
+            title: "Hodně štěstí!",
+            text: "Nyní jsi připraven/a stát se mistrem klikání! Hodně štěstí a bav se!",
+            highlightElementId: null
+        }
+    ];
+    let currentTutorialStep = 0;
+
+    // Lucky Wheel Rewards
+    const luckyWheelRewards = [
+        { type: 'free_upgrade', value: null, message: 'Volné vylepšení!', icon: 'https://placehold.co/60x60/3498db/FFFFFF?text=UPG' },
+        { type: 'coins', value: 100, message: 'Jackpot! 100 Prémium Coinů!', icon: 'https://placehold.co/60x60/FFD700/000000?text=JP' },
+        { type: 'score', value: 2000, message: '2000 kliků!', icon: 'https://placehold.co/60x60/2ecc71/FFFFFF?text=KLIK' },
+        { type: 'score', value: 5000, message: '5000 kliků!', icon: 'https://placehold.co/60x60/2ecc71/FFFFFF?text=KLIK' },
+        { type: 'crit_chance', value: 0.02, message: 'Zvýšená kritická šance!', icon: upgradeIcons.crit_chance },
+        { type: 'auto_power', value: 10, message: 'Bonus k autokliku!', icon: upgradeIcons.auto },
+    ];
+
+    // Treasure Chest Rewards (can be similar or slightly different from lucky wheel)
+    const treasureChestRewards = [
+        { type: 'coins', value: 50, message: '50 Prémium Coinů!', icon: 'https://placehold.co/60x60/FFD700/000000?text=C' },
+        { type: 'score', value: 10000, message: '10 000 kliků!', icon: 'https://placehold.co/60x60/2ecc71/FFFFFF?text=KLIK' },
+        { type: 'score', value: 25000, message: '25 000 kliků!', icon: 'https://placehold.co/60x60/2ecc71/FFFFFF?text=KLIK' },
+        { type: 'click_multiplier', value: 0.05, message: 'Silný násobič kliků!', icon: upgradeIcons.click_multiplier },
+        { type: 'auto_multiplier', value: 0.05, message: 'Silný násobič autokliků!', icon: upgradeIcons.auto_multiplier },
+        { type: 'cost_reduction', value: 0.05, message: 'Snížení nákladů!', icon: upgradeIcons.cost_reduction },
+    ];
+
+
+    // Fisher-Yates shuffle algorithm
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // Funkce pro získání skutečné ceny vylepšení po započítání slevy
+    function getActualUpgradeCost(upgrade) {
+        return Math.floor(upgrade.cost * (1 - costReductionPercentage));
+    }
+
+    // Funkce pro zpracování kliknutí na obrázek
     function clickImage(event) {
-      score += clickPower;
+      initializeAudioContext(); // Ensure audio context is initialized on first user interaction
+      let earned = clickPower * scoreMultiplier; // Apply score multiplier
+      let particleText = `+${earned}`;
+      let particleColor = particleColors[Math.floor(Math.random() * particleColors.length)];
+
+      // Kontrola kritického zásahu
+      if (Math.random() < critChance) {
+          earned = Math.floor(earned * critDamageMultiplier);
+          particleText = `+${earned} CRIT!`;
+          particleColor = '#e74c3c';
+      }
+      score += earned;
       updateScore();
       showMessage();
-      playSound();
-      showParticle(event);
+      playSound('click'); // Use 'click' for the sound type
+      showParticle(event, particleText, particleColor);
       checkSurprise();
+      checkRewards();
+      checkScoreBoostEvent(); // Check for random 2x score event
     }
 
+    // Aktualizuje zobrazené skóre
     function updateScore() {
-      document.getElementById("score").innerText = "Skóre: " + score.toLocaleString();
+      const scoreElement = document.getElementById("score");
+      scoreElement.innerText = score.toLocaleString();
+      scoreElement.classList.remove('pulse');
+      void scoreElement.offsetWidth;
+      scoreElement.classList.add('pulse');
+      updateCoinsDisplay();
+
+      if (score >= gameEndScore) {
+          endGame();
+      }
     }
 
+    // Aktualizuje zobrazení coinů
+    function updateCoinsDisplay() {
+        const coinsElement = document.getElementById("coins");
+        coinsElement.innerHTML = `${coins.toLocaleString()} <i class="fa-solid fa-coins" style="color: #f39c12;"></i>`;
+        coinsElement.classList.remove('pulse');
+        void coinsElement.offsetWidth;
+        coinsElement.classList.add('pulse');
+    }
+
+    // Zobrazuje zprávy na základě skóre
     function showMessage() {
-      let msg = "";
-      if (score >= 1_000_000) msg = "Jsi frajer! / You're awesome! Dostaneš překvápko!";
-      else if (score >= 100_000) msg = "To už fakt jedeš jako mašina!";
-      else if (score >= 10_000) msg = "Už jsi blízko!";
-      else if (score >= 1_000) msg = "To zvládneš!";
-      else if (score >= 100) msg = "To dáš!";
-      document.getElementById("message").innerText = msg;
+      let currentMsg = "";
+      let bestMatchThreshold = 0;
+
+      for (let i = motivationalMessages.length - 1; i >= 0; i--) {
+        const msgEntry = motivationalMessages[i];
+        if (score >= msgEntry.threshold) {
+          currentMsg = msgEntry.msg;
+          bestMatchThreshold = msgEntry.threshold;
+          break;
+        }
+      }
+
+      if (bestMatchThreshold > lastMessageThreshold) {
+        document.getElementById("message").innerText = currentMsg;
+        lastMessageThreshold = bestMatchThreshold;
+      }
+      if (score < lastMessageThreshold && lastMessageThreshold !== 0) {
+          document.getElementById("message").innerText = "";
+          lastMessageThreshold = 0;
+      }
     }
 
-    function playSound() {
-      const sound = document.getElementById("clickSound");
-      sound.currentTime = 0;
-      sound.play();
+    // Přehrává zvuk podle typu
+    function playSound(type) {
+      if (!audioContextInitialized) return; // Don't play if context not initialized
+
+      try {
+        if (type === 'click') {
+          clickSynth.triggerAttackRelease("C4", "8n"); // Simple click sound
+        } else if (type === 'upgrade') {
+          upgradeSynth.triggerAttackRelease("E5", "16n"); // Ding sound
+        } else if (type === 'reward') {
+          rewardSynth.triggerAttackRelease(["C5", "E5", "G5"], "8n"); // Chord for success
+        }
+      } catch (e) {
+        console.error("Chyba při přehrávání zvuku:", e);
+      }
     }
 
-    function showParticle(e) {
+    // Zobrazuje částice (text s +X) při kliknutí
+    function showParticle(e, text, color) {
       const particle = document.createElement("div");
       particle.className = "particle";
-      particle.innerText = "+" + clickPower;
+      particle.innerText = text;
+      particle.style.color = color;
       document.body.appendChild(particle);
       particle.style.left = e.pageX + 'px';
       particle.style.top = e.pageY + 'px';
       setTimeout(() => particle.remove(), 1000);
     }
 
+    // Kontroluje a zobrazuje překvapení při dosažení vysokého skóre
     function checkSurprise() {
-      if (score >= 1_000_000 && !document.getElementById("surprise")) {
-        const surprise = document.createElement("div");
-        surprise.id = "surprise";
-        surprise.innerHTML = '<h2>🎉 Překvapení! 🎉</h2><p>Dostal ses na vrchol! Jsi fakt frajer!</p><img src="https://media.giphy.com/media/111ebonMs90YLu/giphy.gif" width="300">';
-        document.body.appendChild(surprise);
-        updateLeaderboard();
-      }
+      // Surprise je nyní součástí majorMilestoneRewards
     }
 
+    // Funkce pro nákup vylepšení
     function buyUpgrade(index) {
       let upgrade = upgrades[index];
-      if (score >= upgrade.cost) {
-        score -= upgrade.cost;
+      const actualCost = getActualUpgradeCost(upgrade);
+      const upgradeDiv = document.getElementById(`upgrade-${index}`);
+
+      if (score >= actualCost) {
+        score -= actualCost;
         upgrade.level++;
-        if (upgrade.type === "click") clickPower += upgrade.value;
-        else if (upgrade.type === "auto") autoClickPower += upgrade.value;
+
+        applyUpgradeEffect(upgrade);
+
         upgrade.cost = Math.floor(upgrade.cost * 1.3);
+
         updateScore();
         updateUpgrades();
+        playSound('upgrade'); // Use 'upgrade' for the sound type
+
+        if (upgradeDiv) {
+          upgradeDiv.classList.add('purchased');
+          setTimeout(() => {
+            upgradeDiv.classList.remove('purchased');
+          }, 300);
+        }
       }
     }
 
+    // Funkce pro nákup prémium vylepšení
+    function buyPremiumUpgrade(index) {
+        let upgrade = premiumUpgrades[index];
+        const upgradeDiv = document.getElementById(`premium-upgrade-${index}`);
+
+        if (coins >= upgrade.coinCost) {
+            coins -= upgrade.coinCost;
+            upgrade.level++;
+
+            applyUpgradeEffect(upgrade);
+
+            upgrade.coinCost = Math.floor(upgrade.coinCost * 1.8); // Make premium upgrades more expensive per level
+
+            updateScore();
+            renderPremiumUpgrades();
+            playSound('upgrade'); // Use 'upgrade' for the sound type
+
+            if (upgradeDiv) {
+                upgradeDiv.classList.add('purchased');
+                setTimeout(() => {
+                    upgradeDiv.classList.remove('purchased');
+                }, 300);
+            }
+        } else {
+            showRewardModal('Nedostatek Coinů', `Potřebuješ ${upgrade.coinCost - coins} Coinů více pro ${upgrade.name}.`, 'https://placehold.co/60x60/c0392b/FFFFFF?text=X');
+        }
+    }
+
+    // Funkce pro nákup mazlíčka
+    function buyPet(index) {
+        let pet = pets[index];
+        const petDiv = document.getElementById(`pet-${index}`);
+
+        if (!pet.purchased && coins >= pet.cost) {
+            coins -= pet.cost;
+            pet.purchased = true;
+            applyPetEffect(pet);
+
+            updateScore();
+            renderPets();
+            playSound('upgrade'); // Use 'upgrade' for the sound type
+            showRewardModal('Nový mazlíček!', `Právě jsi si pořídil/a ${pet.name}!`, pet.icon);
+
+            if (petDiv) {
+                petDiv.classList.add('purchased');
+                setTimeout(() => {
+                    petDiv.classList.remove('purchased');
+                }, 300);
+            }
+        } else if (pet.purchased) {
+            showRewardModal('Už ho máš!', `${pet.name} už máš pořízeného!`, 'https://placehold.co/60x60/3498db/FFFFFF?text=OK');
+        } else {
+            showRewardModal('Nedostatek Coinů', `Potřebuješ ${pet.cost - coins} Coinů více pro ${pet.name}.`, 'https://placehold.co/60x60/c0392b/FFFFFF?text=X');
+        }
+    }
+
+
+    // Aplikuje efekt vylepšení (pro normální i prémium upgrady)
+    function applyUpgradeEffect(upgrade) {
+        if (upgrade.type === "click") {
+          clickPower += upgrade.value;
+        } else if (upgrade.type === "auto") {
+          autoClickPower += upgrade.value;
+        } else if (upgrade.type === "click_multiplier") {
+          clickPower *= (1 + upgrade.value);
+        } else if (upgrade.type === "auto_multiplier") {
+          autoClickPower *= (1 + upgrade.value);
+        } else if (upgrade.type === "crit_chance") {
+          critChance = Math.min(0.99, critChance + upgrade.value);
+        } else if (upgrade.type === "crit_damage") {
+          critDamageMultiplier += upgrade.value;
+        } else if (upgrade.type === "cost_reduction") {
+          costReductionPercentage = Math.min(0.9, costReductionPercentage + upgrade.value);
+        } else if (upgrade.type === "luck_boost") {
+          // For now, let's just make it a general boost to crit chance for simplicity
+          critChance = Math.min(0.99, critChance + upgrade.value);
+        } else if (upgrade.type === "time_warp") {
+          score += autoClickPower * upgrade.value; // Instantly add auto-click income for X seconds
+        } else if (upgrade.type === "premium_click") {
+            clickPower += upgrade.value;
+        } else if (upgrade.type === "premium_auto") {
+            autoClickPower += upgrade.value;
+        } else if (upgrade.type === "premium_crit") {
+            critChance = Math.min(0.99, critChance + upgrade.value);
+            critDamageMultiplier += upgrade.value * 1; // Increased effect
+        } else if (upgrade.type === "premium_coin_bonus") {
+            coins += upgrade.value;
+        } else if (upgrade.type === "premium_all_boost") {
+            clickPower *= (1 + upgrade.value);
+            autoClickPower *= (1 + upgrade.value);
+            critChance = Math.min(0.99, critChance + upgrade.value * 0.5);
+            critDamageMultiplier += upgrade.value * 0.5;
+        } else if (upgrade.type === "passive_coin_gen") {
+            // This will be handled by a separate interval or check
+            // For now, it just indicates the upgrade exists
+        }
+    }
+
+    // Aplikuje efekt mazlíčka
+    function applyPetEffect(pet) {
+        if (pet.abilityType === "auto_boost") {
+            autoClickPower *= (1 + pet.abilityValue);
+        } else if (pet.abilityType === "click_boost") {
+            clickPower *= (1 + pet.abilityValue);
+        } else if (pet.abilityType === "crit_chance_boost") {
+            critChance = Math.min(0.99, critChance + pet.abilityValue);
+        } else if (pet.abilityType === "cost_reduction") {
+            costReductionPercentage = Math.min(0.9, costReductionPercentage + pet.abilityValue);
+        } else if (pet.abilityType === "coin_multiplier") {
+            // Future implementation: multiplier for coin exchange or passive coin gen
+        } else if (pet.abilityType === "random_score_burst") {
+            // This pet would trigger random score bursts, handled by a separate interval
+        } else if (pet.abilityType === "boost_duration") {
+            // Increases duration of score boost events
+        } else if (pet.abilityType === "crit_damage_boost") {
+            critDamageMultiplier += pet.abilityValue;
+        } else if (pet.abilityType === "cooldown_reduction") {
+            // Reduces cooldowns of lucky wheel/treasure chest
+        } else if (pet.abilityType === "passive_score_gen") {
+            // Small constant score per second, added to autoClickPower for simplicity
+            autoClickPower += pet.abilityValue;
+        } else if (pet.abilityType === "refund_upgrade") {
+            // One-time use, handled by a specific UI interaction for the pet
+        } else if (pet.abilityType === "click_duplication") {
+            // Small percentage of clicks duplicated
+        } else if (pet.abilityType === "base_click_increase") {
+            clickPower += pet.abilityValue;
+        } else if (pet.abilityType === "rare_find_chance") {
+            // Increases chance of finding rare items
+        } else if (pet.abilityType === "passive_coin_increase") {
+            // Increases passive coin generation from premium upgrades
+        } else if (pet.abilityType === "burst_auto_click") {
+            // Stores auto-clicks and releases them in a burst
+        } else if (pet.abilityType === "reward_value_boost") {
+            // Increases score/coin from lucky wheel/treasure chest
+        } else if (pet.abilityType === "adaptive_boost") {
+            // Adapts its bonus to your lowest stat
+        } else if (pet.abilityType === "stored_score_bonus") {
+            // Stores unspent score and adds it when you buy an upgrade
+        } else if (pet.abilityType === "temporary_mega_click") {
+            // Grants temporary massive click boost
+        } else if (pet.abilityType === "freeze_auto_click") {
+            // Freezes auto-click power at a high rate for a short period
+        } else if (pet.abilityType === "reveal_next_reward") {
+            // Reveals next lucky wheel reward
+        } else if (pet.abilityType === "multi_click") {
+            // Allows multiple simultaneous clicks
+        }
+        // Re-apply all pet effects on load to ensure persistent bonuses
+        updateScore();
+    }
+
+
+    // Aktualizuje zobrazení dostupných vylepšení
     function updateUpgrades() {
       const container = document.getElementById("upgrades");
       container.innerHTML = "";
-      upgrades.forEach((u, i) => {
-        const div = document.createElement("div");
-        div.className = "upgrade";
-        div.innerHTML = `<strong>${u.name}</strong><br>Úroveň: ${u.level}<br>Cena: ${u.cost}<br>+${u.value} ${u.type === "click" ? "/ klik" : "/ sekundu"}`;
-        div.onclick = () => buyUpgrade(i);
-        container.appendChild(div);
+
+      const upgradeCategories = {
+          "click": { title: "Vylepšení klikání", upgrades: [] },
+          "auto": { title: "Vylepšení autoklikání", upgrades: [] },
+          "multipliers": { title: "Násobiče", upgrades: [] },
+          "special": { title: "Speciální vylepšení", upgrades: [] }
+      };
+
+      upgrades.forEach(u => {
+          if (u.type === "click") upgradeCategories.click.upgrades.push(u);
+          else if (u.type === "auto") upgradeCategories.auto.upgrades.push(u);
+          else if (u.type === "click_multiplier" || u.type === "auto_multiplier") upgradeCategories.multipliers.upgrades.push(u);
+          else if (u.type === "crit_chance" || u.type === "crit_damage" || u.type === "cost_reduction" || u.type === "luck_boost" || u.type === "time_warp") upgradeCategories.special.upgrades.push(u);
       });
+
+      for (const categoryKey in upgradeCategories) {
+          const category = upgradeCategories[categoryKey];
+          if (category.upgrades.length > 0) {
+              const categoryHeader = document.createElement("h3");
+              categoryHeader.className = "upgrade-category-header";
+              categoryHeader.innerText = category.title;
+              container.appendChild(categoryHeader);
+
+              category.upgrades.forEach((u, idx) => {
+                  const div = document.createElement("div");
+                  div.className = "upgrade-card";
+                  div.id = `upgrade-${upgrades.indexOf(u)}`;
+                  let description = "";
+                  const actualCost = getActualUpgradeCost(u);
+
+                  if (u.type === "click") description = `+${u.value} / klik`;
+                  else if (u.type === "auto") description = `+${u.value} / sekundu`;
+                  else if (u.type === "click_multiplier") description = `Násobí kliky o ${Math.round(u.value * 100)}%`;
+                  else if (u.type === "auto_multiplier") description = `Násobí autokliky o ${Math.round(u.value * 100)}%`;
+                  else if (u.type === "crit_chance") description = `+${Math.round(u.value * 100)}% kritická šance`;
+                  else if (u.type === "crit_damage") description = `+${u.value}x kritické poškození`;
+                  else if (u.type === "cost_reduction") description = `Sníží ceny o ${Math.round(u.value * 100)}%`;
+                  else if (u.type === "luck_boost") description = `Zvýší šanci na speciální události o ${Math.round(u.value * 100)}%`;
+                  else if (u.type === "time_warp") description = `Okamžitý zisk za ${u.value} sekund autokliku`;
+
+                  div.innerHTML = `
+                    <img src="${u.icon}" alt="${u.name} Icon" class="upgrade-icon">
+                    <strong>${u.name}</strong>
+                    <span class="description">Úroveň: ${u.level}<br>${description}</span>
+                    <span class="cost">Cena: ${actualCost.toLocaleString()}</span>
+                  `;
+                  div.onclick = () => buyUpgrade(upgrades.indexOf(u));
+
+                  if (score < actualCost) {
+                      div.style.opacity = "0.6";
+                      div.style.cursor = "not-allowed";
+                      div.onclick = null;
+                  }
+
+                  container.appendChild(div);
+              });
+          }
+      }
     }
 
+    // Renderuje prémium vylepšení
+    function renderPremiumUpgrades() {
+        const container = document.getElementById("premiumUpgradesContent"); // Změněno na premiumUpgradesContent
+        container.innerHTML = "";
+
+        premiumUpgrades.forEach((u, idx) => {
+            const div = document.createElement("div");
+            div.className = "upgrade-card";
+            div.id = `premium-upgrade-${idx}`;
+            let description = "";
+
+            if (u.type === "premium_click") description = `+${u.value} prémium kliků`;
+            else if (u.type === "premium_auto") description = `+${u.value} prémium autokliků`;
+            else if (u.type === "premium_crit") description = `+${Math.round(u.value * 100)}% prémium kritická šance a ${u.value * 1}x poškození`;
+            else if (u.type === "premium_coin_bonus") description = `Okamžitý bonus ${u.value} Coinů`;
+            else if (u.type === "premium_all_boost") description = `Všechny bonusy +${Math.round(u.value * 100)}%`;
+            else if (u.type === "passive_coin_gen") description = `Generuje ${u.value} Coinů za sekundu`;
+
+
+            div.innerHTML = `
+                <img src="${u.icon}" alt="${u.name} Icon" class="upgrade-icon">
+                <strong>${u.name}</strong>
+                <span class="description">Úroveň: ${u.level}<br>${description}</span>
+                <span class="cost coin-cost">Cena: ${u.coinCost.toLocaleString()} <i class="fa-solid fa-coins" style="color: #f39c12;"></i></span>
+            `;
+            div.onclick = () => buyPremiumUpgrade(idx);
+
+            if (coins < u.coinCost) {
+                div.style.opacity = "0.6";
+                div.style.cursor = "not-allowed";
+                div.onclick = null;
+            }
+            container.appendChild(div);
+        });
+    }
+
+    // Renderuje mazlíčky
+    function renderPets() {
+        const container = document.getElementById("petsContent");
+        container.innerHTML = "";
+
+        pets.forEach((p, idx) => {
+            const div = document.createElement("div");
+            div.className = "upgrade-card"; // Reusing upgrade-card style
+            div.id = `pet-${idx}`;
+            
+            let statusText = p.purchased ? "Pořízeno!" : `Cena: ${p.cost.toLocaleString()} <i class="fa-solid fa-coins" style="color: #f39c12;"></i>`;
+            let buttonClass = p.purchased ? "purchased-pet" : "";
+            let cursorStyle = p.purchased || coins < p.cost ? "not-allowed" : "pointer";
+            let opacityStyle = p.purchased || coins < p.cost ? "0.6" : "1";
+
+            div.innerHTML = `
+                <img src="${p.icon}" alt="${p.name} Icon" class="upgrade-icon">
+                <strong>${p.name}</strong>
+                <span class="description">${p.description}</span>
+                <span class="cost coin-cost ${buttonClass}">${statusText}</span>
+            `;
+            div.style.cursor = cursorStyle;
+            div.style.opacity = opacityStyle;
+
+            if (!p.purchased && coins >= p.cost) {
+                div.onclick = () => buyPet(idx);
+            } else {
+                div.onclick = null;
+            }
+            container.appendChild(div);
+        });
+    }
+
+
+    // Inicializuje seznam vylepšení
     function initUpgrades() {
-      for (let i = 1; i <= 50; i++) {
-        upgrades.push({
-          name: `Klikáč Lv.${i}`,
-          type: "click",
-          value: i,
-          cost: 50 * i,
-          level: 0
-        });
+      upgrades = [];
+
+      // Normal Click and Auto-Click upgrades (reduced levels for simplicity)
+      for (let i = 1; i <= 20; i++) {
+        upgrades.push({ name: `Klikáč Lv.${i}`, type: "click", value: 10 * i, cost: 500 * i, level: 0, icon: upgradeIcons.click });
       }
-      for (let i = 1; i <= 50; i++) {
-        upgrades.push({
-          name: `Autokliker Lv.${i}`,
-          type: "auto",
-          value: i,
-          cost: 100 * i,
-          level: 0
-        });
+      for (let i = 1; i <= 20; i++) {
+        upgrades.push({ name: `Autokliker Lv.${i}`, type: "auto", value: 5 * i, cost: 1000 * i, level: 0, icon: upgradeIcons.auto });
       }
+
+      // Multipliers
+      for (let i = 1; i <= 5; i++) {
+        upgrades.push({ name: `Násobič kliků Lv.${i}`, type: "click_multiplier", value: 0.2, cost: 25000 * Math.pow(2, i - 1), level: 0, icon: upgradeIcons.click_multiplier });
+      }
+      for (let i = 1; i <= 5; i++) {
+        upgrades.push({ name: `Násobič autokliků Lv.${i}`, type: "auto_multiplier", value: 0.2, cost: 50000 * Math.pow(2, i - 1), level: 0, icon: upgradeIcons.auto_multiplier });
+      }
+
+      // Criticals
+      for (let i = 1; i <= 3; i++) {
+        upgrades.push({ name: `Šance kritického kliku Lv.${i}`, type: "crit_chance", value: 0.05, cost: 100000 * Math.pow(3, i - 1), level: 0, icon: upgradeIcons.crit_chance });
+      }
+      for (let i = 1; i <= 3; i++) {
+        upgrades.push({ name: `Síla kritického kliku Lv.${i}`, type: "crit_damage", value: 1.0, cost: 150000 * Math.pow(3, i - 1), level: 0, icon: upgradeIcons.crit_damage });
+      }
+
+      // Cost Reduction (fewer levels, higher impact)
+      upgrades.push({ name: `Snížení nákladů I`, type: "cost_reduction", value: 0.1, cost: 200000, level: 0, icon: upgradeIcons.cost_reduction });
+      upgrades.push({ name: `Snížení nákladů II`, type: "cost_reduction", value: 0.15, cost: 1000000, level: 0, icon: upgradeIcons.cost_reduction });
+
+
+      // New Original Upgrades
+      for (let i = 1; i <= 3; i++) {
+        upgrades.push({ name: `Zvýšení štěstí Lv.${i}`, type: "luck_boost", value: 0.01 * i, cost: 75000 * Math.pow(2.5, i - 1), level: 0, icon: upgradeIcons.luck_boost });
+      }
+      for (let i = 1; i <= 3; i++) {
+        upgrades.push({ name: `Časová smyčka Lv.${i}`, type: "time_warp", value: 5 * i, cost: 120000 * Math.pow(2.8, i - 1), level: 0, icon: upgradeIcons.time_warp });
+      }
+
       updateUpgrades();
     }
 
-    function saveScore() {
+    // Inicializuje prémium vylepšení (více OP, vyšší cena)
+    function initPremiumUpgrades() {
+        premiumUpgrades = [];
+        // Premium Click Power
+        for (let i = 1; i <= 5; i++) {
+            premiumUpgrades.push({ name: `Mega Klik Lv.${i}`, type: "premium_click", value: 500 * i, coinCost: 1000 * Math.pow(2.5, i - 1), level: 0, icon: upgradeIcons.premium_click });
+        }
+        // Premium Auto Click Power
+        for (let i = 1; i <= 5; i++) {
+            premiumUpgrades.push({ name: `Ultra Autoklik Lv.${i}`, type: "premium_auto", value: 200 * i, coinCost: 2000 * Math.pow(2.8, i - 1), level: 0, icon: upgradeIcons.premium_auto });
+        }
+        // Premium Critical Boost
+        for (let i = 1; i <= 3; i++) {
+            premiumUpgrades.push({ name: `Absolutní Krit Lv.${i}`, type: "premium_crit", value: 0.1 * i, coinCost: 5000 * Math.pow(3, i - 1), level: 0, icon: upgradeIcons.premium_crit });
+        }
+        // Passive Coin Generation (New OP premium upgrade)
+        for (let i = 1; i <= 3; i++) {
+            premiumUpgrades.push({ name: `Generátor Coinů Lv.${i}`, type: "passive_coin_gen", value: 1 * i, coinCost: 10000 * Math.pow(3.5, i - 1), level: 0, icon: upgradeIcons.passive_coin_gen });
+        }
+        // Ultimate All Boost
+        premiumUpgrades.push({ name: `Ultimativní Boost`, type: "premium_all_boost", value: 0.5, coinCost: 50000, level: 0, icon: upgradeIcons.premium_all_boost });
+
+        renderPremiumUpgrades();
+    }
+
+    // Inicializuje mazlíčky
+    function initPets() {
+        pets = [
+            { name: "Pes (Buddy)", description: "Zvyšuje autoklik o 10%.", abilityType: "auto_boost", abilityValue: 0.1, cost: 100, icon: petIcons.dog, purchased: false },
+            { name: "Kočka (Micka)", description: "Zvyšuje kritickou šanci o 2%.", abilityType: "crit_chance_boost", abilityValue: 0.02, cost: 100, icon: petIcons.cat, purchased: false },
+            { name: "Drak (Fafnir)", description: "Zvyšuje klik i autoklik o 50%.", abilityType: "all_boost", abilityValue: 0.5, cost: 500, icon: petIcons.dragon, purchased: false },
+            { name: "Sova (Hedvika)", description: "Snižuje cenu vylepšení o 5%.", abilityType: "cost_reduction", abilityValue: 0.05, cost: 200, icon: petIcons.owl, purchased: false },
+            { name: "Liška (Ryška)", description: "Zvyšuje získávání coinů o 10%.", abilityType: "coin_multiplier", abilityValue: 0.1, cost: 150, icon: petIcons.fox, purchased: false },
+            { name: "Jednorožec (Sparkle)", description: "Malá šance na obrovský klik bonus.", abilityType: "random_score_burst", abilityValue: 100000, cost: 300, icon: petIcons.unicorn, purchased: false },
+            { name: "Robot (Unit 734)", description: "Zvyšuje pasivní generaci coinů o 20%.", abilityType: "passive_coin_increase", abilityValue: 0.2, cost: 250, icon: petIcons.robot, purchased: false },
+            { name: "Veverka (Chip)", description: "Generuje malé množství skóre náhodně.", abilityType: "random_score_gen", abilityValue: 500, cost: 120, icon: petIcons.squirrel, purchased: false },
+            { name: "Panda (Po)", description: "Zvyšuje trvání bonusů 2x skóre o 20%.", abilityType: "boost_duration", abilityValue: 0.2, cost: 180, icon: petIcons.panda, purchased: false },
+            { name: "Vlk (Shadow)", description: "Zvyšuje kritické poškození o 0.5x.", abilityType: "crit_damage_boost", abilityValue: 0.5, cost: 220, icon: petIcons.wolf, purchased: false },
+            { name: "Králík (Thumper)", description: "Snižuje cooldowny událostí o 10%.", abilityType: "cooldown_reduction", abilityValue: 0.1, cost: 130, icon: petIcons.rabbit, purchased: false },
+            { name: "Želva (Shelly)", description: "Poskytuje malý konstantní skóre za sekundu (+10 autoklik).", abilityType: "passive_score_gen", abilityValue: 10, cost: 110, icon: petIcons.turtle, purchased: false },
+            { name: "Fénix (Blaze)", description: "Jednorázově vrátí peníze za náhodné vylepšení a ponechá jeho efekt.", abilityType: "refund_upgrade", abilityValue: null, cost: 400, icon: petIcons.phoenix, purchased: false },
+            { name: "Sliz (Blobby)", description: "Duplikuje 1% kliků.", abilityType: "click_duplication", abilityValue: 0.01, cost: 160, icon: petIcons.slime, purchased: false },
+            { name: "Golem (Rock)", description: "Zvyšuje základní sílu kliku o 50.", abilityType: "base_click_increase", abilityValue: 50, cost: 280, icon: petIcons.golem, purchased: false },
+            { name: "Duch (Whisper)", description: "Zvyšuje šanci na nalezení vzácných předmětů o 5%.", abilityType: "rare_find_chance", abilityValue: 0.05, cost: 190, icon: petIcons.spirit, purchased: false },
+            { name: "Včela (Buzzy)", description: "Generuje 1 coin náhodně každých 30 sekund.", abilityType: "random_coin_gen", abilityValue: 1, cost: 140, icon: petIcons.bee, purchased: false },
+            { name: "Pavouk (Arachne)", description: "Ukládá 2% autokliků a uvolní je v nárazu každých 5 minut.", abilityType: "burst_auto_click", abilityValue: 0.02, cost: 210, icon: petIcons.spider, purchased: false },
+            { name: "Delfín (Flipper)", description: "Zvyšuje hodnotu odměn z kola štěstí/truhly o 15%.", abilityType: "reward_value_boost", abilityValue: 0.15, cost: 230, icon: petIcons.dolphin, purchased: false },
+            { name: "Chameleon (Rango)", description: "Poskytuje bonus k tvé nejnižší statistice (klik, autoklik, krit).", abilityType: "adaptive_boost", abilityValue: 0.1, cost: 260, icon: petIcons.chameleon, purchased: false },
+            { name: "Slon (Dumbo)", description: "Ukládá 1% neutraceného skóre a přidá ho při nákupu vylepšení.", abilityType: "stored_score_bonus", abilityValue: 0.01, cost: 270, icon: petIcons.elephant, purchased: false },
+            { name: "Lev (Simba)", description: "Po každých 1000 kliknutích získáš 10 sekund 5x klik bonus.", abilityType: "temporary_mega_click", abilityValue: 5, cost: 350, icon: petIcons.lion, purchased: false },
+            { name: "Tučňák (Skipper)", description: "Zmrazí autoklik na 200% po dobu 1 minuty každých 10 minut.", abilityType: "freeze_auto_click", abilityValue: 2, cost: 320, icon: petIcons.penguin, purchased: false },
+            { name: "Netopýr (Dracula)", description: "Odhalí další odměnu v kole štěstí.", abilityType: "reveal_next_reward", abilityValue: null, cost: 290, icon: petIcons.bat, purchased: false },
+            { name: "Chobotnice (Octavius)", description: "Umožňuje 3 simultánní kliky po dobu 10 sekund (cooldown 5 min).", abilityType: "multi_click", abilityValue: 3, cost: 380, icon: petIcons.octopus, purchased: false }
+        ];
+        renderPets();
+    }
+
+
+    // Uloží stav hry (skóre, vylepšení, přezdívku, coiny, stav milníků) do lokálního úložiště
+    function saveGame() {
       localStorage.setItem("tobiScore", score);
+      localStorage.setItem("tobiCoins", coins);
+      localStorage.setItem("tobiClickPower", clickPower);
+      localStorage.setItem("tobiAutoClickPower", autoClickPower);
+      localStorage.setItem("tobiCritChance", critChance);
+      localStorage.setItem("tobiCritDamageMultiplier", critDamageMultiplier);
+      localStorage.setItem("tobiCostReductionPercentage", costReductionPercentage);
+      localStorage.setItem("tobiUpgrades", JSON.stringify(upgrades));
+      localStorage.setItem("tobiPremiumUpgrades", JSON.stringify(premiumUpgrades));
+      localStorage.setItem("tobiPets", JSON.stringify(pets)); // Save pets
+      localStorage.setItem("tobiNickname", nickname);
+      localStorage.setItem("tobiLastMessageThreshold", lastMessageThreshold);
+      localStorage.setItem("tobiClaimedMajorMilestones", JSON.stringify(claimedMajorMilestones));
+      localStorage.setItem("tobiLastMinorRewardThreshold", lastMinorRewardThreshold);
+      localStorage.setItem("tobiShuffledMemeImages", JSON.stringify(shuffledMemeImages));
+      localStorage.setItem("tobiCurrentMemeIndex", currentMemeIndex);
+      localStorage.setItem("tobiScoreMultiplier", scoreMultiplier);
+      localStorage.setItem("tobiScoreBoostEndTime", scoreBoostEndTime);
+      localStorage.setItem("tobiLastSpinTime", lastSpinTime);
+      localStorage.setItem("tobiLastChestOpenTime", lastChestOpenTime);
+
+      showRewardModal('Hra uložena!', 'Tvůj pokrok byl úspěšně uložen!', 'https://placehold.co/60x60/27ae60/FFFFFF?text=💾');
     }
 
-    function loadScore() {
-      const saved = localStorage.getItem("tobiScore");
-      if (saved) score = parseInt(saved);
+    // Načte stav hry z lokálního úložiště
+    function loadGame() {
+      const savedScore = localStorage.getItem("tobiScore");
+      const savedCoins = localStorage.getItem("tobiCoins");
+      const savedClickPower = localStorage.getItem("tobiClickPower");
+      const savedAutoClickPower = localStorage.getItem("tobiAutoClickPower");
+      const savedCritChance = localStorage.getItem("tobiCritChance");
+      const savedCritDamageMultiplier = localStorage.getItem("tobiCritDamageMultiplier");
+      const savedCostReductionPercentage = localStorage.getItem("tobiCostReductionPercentage");
+      const savedUpgrades = localStorage.getItem("tobiUpgrades");
+      const savedPremiumUpgrades = localStorage.getItem("tobiPremiumUpgrades");
+      const savedPets = localStorage.getItem("tobiPets"); // Load pets
+      const savedNickname = localStorage.getItem("tobiNickname");
+      const savedLastMessageThreshold = localStorage.getItem("tobiLastMessageThreshold");
+      const savedClaimedMajorMilestones = localStorage.getItem("tobiClaimedMajorMilestones");
+      const savedLastMinorRewardThreshold = localStorage.getItem("tobiLastMinorRewardThreshold");
+      const savedShuffledMemeImages = localStorage.getItem("tobiShuffledMemeImages");
+      const savedCurrentMemeIndex = localStorage.getItem("tobiCurrentMemeIndex");
+      const savedScoreMultiplier = localStorage.getItem("tobiScoreMultiplier");
+      const savedScoreBoostEndTime = localStorage.getItem("tobiScoreBoostEndTime");
+      const savedLastSpinTime = localStorage.getItem("tobiLastSpinTime");
+      const savedLastChestOpenTime = localStorage.getItem("tobiLastChestOpenTime");
+
+
+      if (savedScore) score = parseInt(savedScore);
+      if (savedCoins) coins = parseInt(savedCoins);
+      if (savedClickPower) clickPower = parseFloat(savedClickPower);
+      if (savedAutoClickPower) autoClickPower = parseFloat(savedAutoClickPower);
+      if (savedCritChance) critChance = parseFloat(savedCritChance);
+      if (savedCritDamageMultiplier) critDamageMultiplier = parseFloat(savedCritDamageMultiplier);
+      if (savedCostReductionPercentage) costReductionPercentage = parseFloat(savedCostReductionPercentage);
+      if (savedScoreMultiplier) scoreMultiplier = parseFloat(savedScoreMultiplier);
+      if (savedScoreBoostEndTime) scoreBoostEndTime = parseInt(savedScoreBoostEndTime);
+      if (savedLastSpinTime) lastSpinTime = parseInt(savedLastSpinTime);
+      if (savedLastChestOpenTime) lastChestOpenTime = parseInt(savedLastChestOpenTime);
+      
+      // Load upgrades, ensuring new types are initialized if not present in saved data
+      initUpgrades(); // Initialize defaults first
+      if (savedUpgrades) {
+          const loadedUpgrades = JSON.parse(savedUpgrades);
+          upgrades = upgrades.map(defaultU => {
+              const loadedU = loadedUpgrades.find(lu => lu.name === defaultU.name && lu.type === defaultU.type);
+              return loadedU ? loadedU : defaultU;
+          });
+      }
+
+      initPremiumUpgrades(); // Initialize defaults first
+      if (savedPremiumUpgrades) {
+          const loadedPremiumUpgrades = JSON.parse(savedPremiumUpgrades);
+          premiumUpgrades = premiumUpgrades.map(defaultU => {
+              const loadedU = loadedPremiumUpgrades.find(lu => lu.name === defaultU.name && lu.type === defaultU.type);
+              return loadedU ? loadedU : defaultU;
+          });
+      }
+
+      initPets(); // Initialize defaults first
+      if (savedPets) {
+          const loadedPets = JSON.parse(savedPets);
+          pets = pets.map(defaultP => {
+              const loadedP = loadedPets.find(lp => lp.name === defaultP.name);
+              return loadedP ? loadedP : defaultP;
+          });
+          // Re-apply pet effects after loading
+          pets.filter(p => p.purchased).forEach(p => applyPetEffect(p));
+      }
+
+
+      if (savedNickname) nickname = savedNickname;
+      if (savedLastMessageThreshold) lastMessageThreshold = parseInt(savedLastMessageThreshold);
+      if (savedClaimedMajorMilestones) claimedMajorMilestones = JSON.parse(savedClaimedMajorMilestones);
+      if (savedLastMinorRewardThreshold) lastMinorRewardThreshold = parseInt(savedLastMinorRewardThreshold);
+      if (savedShuffledMemeImages) shuffledMemeImages = JSON.parse(savedShuffledMemeImages); else shuffledMemeImages = shuffleArray([...memeImages]);
+      if (savedCurrentMemeIndex) currentMemeIndex = parseInt(savedCurrentMemeIndex);
+
+      // Zajištění, že všechny majorMilestoneRewards mají `claimed` status
+      majorMilestoneRewards.forEach(reward => {
+          if (claimedMajorMilestones[reward.id] === undefined) {
+              claimedMajorMilestones[reward.id] = false;
+          }
+      });
+
       updateScore();
+      updateUpgrades();
+      renderPremiumUpgrades();
+      renderPets(); // Render pets on load
+      displayNickname();
+      updateLeaderboard();
+      updateScoreBoostMessage(); // Update boost message on load
+      showRewardModal('Hra načtena!', 'Tvůj pokrok byl úspěšně načten!', 'https://placehold.co/60x60/3498db/FFFFFF?text=📂');
     }
 
+    // Resetuje hru do počátečního stavu
     function resetGame() {
       score = 0;
+      coins = 0;
       clickPower = 1;
       autoClickPower = 0;
+      critChance = 0.05;
+      critDamageMultiplier = 2;
+      costReductionPercentage = 0;
+      scoreMultiplier = 1;
+      scoreBoostEndTime = 0;
+      lastSpinTime = 0;
+      lastChestOpenTime = 0;
+
       upgrades = [];
+      premiumUpgrades = [];
+      pets = []; // Reset pets
+      nickname = "Hráč";
+      localStorage.clear();
+
       document.getElementById("upgrades").innerHTML = "";
+      document.getElementById("premiumUpgradesContent").innerHTML = "";
+      document.getElementById("petsContent").innerHTML = ""; // Clear pets content
       document.getElementById("message").innerText = "";
       document.getElementById("surprise")?.remove();
+      document.getElementById("scoreBoostMessage").style.display = 'none'; // Hide boost message
+
       initUpgrades();
+      initPremiumUpgrades();
+      initPets(); // Re-initialize pets
       updateScore();
+      displayNickname();
+      updateLeaderboard();
+      lastMessageThreshold = 0;
+      claimedMajorMilestones = {};
+      majorMilestoneRewards.forEach(reward => reward.claimed = false);
+      lastMinorRewardThreshold = 0;
+      shuffledMemeImages = shuffleArray([...memeImages]);
+      currentMemeIndex = 0;
+      showRewardModal('Hra restartována!', 'Vše bylo resetováno. Hodně štěstí!', 'https://placehold.co/60x60/e74c3c/FFFFFF?text=🔄');
     }
 
+    // Aktualizuje žebříček nejlepších skóre
     function updateLeaderboard() {
       const list = document.getElementById("leaderboardList");
-      const current = score;
-      const stored = JSON.parse(localStorage.getItem("tobiLeaderboard")) || [];
-      stored.push(current);
-      stored.sort((a,b) => b-a);
+      const currentScoreEntry = { score: score, nickname: nickname };
+      let stored = JSON.parse(localStorage.getItem("tobiLeaderboard")) || [];
+
+      if (currentScoreEntry.score > 0) {
+          // Check if nickname already exists in leaderboard, if so, update score if higher
+          const existingEntryIndex = stored.findIndex(entry => entry.nickname === nickname);
+          if (existingEntryIndex > -1) {
+              if (currentScoreEntry.score > stored[existingEntryIndex].score) {
+                  stored[existingEntryIndex].score = currentScoreEntry.score;
+              }
+          } else {
+              stored.push(currentScoreEntry);
+          }
+      }
+
+      stored.sort((a,b) => b.score - a.score);
       const top = stored.slice(0,5);
+
       localStorage.setItem("tobiLeaderboard", JSON.stringify(top));
-      list.innerHTML = top.map(s => `<li>${s.toLocaleString()}</li>`).join("");
+      list.innerHTML = top.map(entry => `<li><span>${entry.nickname}</span><span>${entry.score.toLocaleString()}</span></li>`).join("");
     }
 
-    setInterval(() => {
-      score += autoClickPower;
-      updateScore();
-      showMessage();
-      checkSurprise();
-    }, 1000);
+    // Zobrazí přezdívku hráče
+    function displayNickname() {
+      document.getElementById("playerNickname").innerText = `Hráč: ${nickname}`;
+    }
 
-    initUpgrades();
-    updateLeaderboard();
-  </script>
-</body>
-</html>
+    // Funkce pro zobrazení náhodného meme
+    function showRandomMeme() {
+      const memeDisplay = document.getElementById('memeDisplay');
+      
+      if (currentMemeIndex >= shuffledMemeImages.length) {
+          shuffledMemeImages = shuffleArray([...memeImages]);
+          currentMemeIndex = 0;
+      }
+
+      const selectedMeme = shuffledMemeImages[currentMemeIndex];
+      currentMemeIndex++;
+
+      memeDisplay.innerHTML = `<img src="${selectedMeme}" alt="Meme">`;
+      memeDisplay.classList.add('show');
+
+      clearTimeout(memeTimeoutId);
+      memeTimeoutId = setTimeout(() => {
+        memeDisplay.classList.remove('show');
+      }, 5000);
+    }
+
+    // Výměna kliků za coiny
+    function exchangeClicksForCoins() {
+        if (score >= coinExchangeRate.clicks) {
+            score -= coinExchangeRate.clicks;
+            coins += coinExchangeRate.coins;
+            updateScore();
+            updateCoinsDisplay();
+            playSound('reward'); // Use 'reward' for the sound type
+            showRewardModal('Výměna úspěšná!', `Vyměnil jsi ${coinExchangeRate.clicks.toLocaleString()} kliků za ${coinExchangeRate.coins} Coinů!`, 'https://placehold.co/60x60/f39c12/FFFFFF?text=Výměna');
+        } else {
+            showRewardModal('Nedostatek kliků', `Potřebuješ ${coinExchangeRate.clicks.toLocaleString()} kliků pro výměnu za Coiny.`, 'https://placehold.co/60x60/c0392b/FFFFFF?text=X');
+        }
+    }
+
+    // Zobrazení modálního okna s odměnou
+    function showRewardModal(title, message, iconUrl) {
+        const modal = document.getElementById('rewardModal');
+        document.getElementById('rewardTitle').innerText = title;
+        document.getElementById('rewardMessage').innerText = message;
+        document.getElementById('rewardIcon').src = iconUrl;
+        modal.classList.add('show');
+        playSound('reward'); // Use 'reward' for the sound type
+    }
+
+    // Skrytí modálního okna s odměnou
+    function hideRewardModal() {
+        document.getElementById('rewardModal').classList.remove('show');
+    }
+
+    // Kontrola všech typů odměn
+    function checkRewards() {
+        checkMajorMilestoneRewards();
+        checkMinorRepeatableRewards();
+    }
+
+    // Kontrola jednorázových hlavních milníků
+    function checkMajorMilestoneRewards() {
+        majorMilestoneRewards.forEach(reward => {
+            if (score >= reward.threshold && !claimedMajorMilestones[reward.id]) {
+                if (reward.type === 'surprise') {
+                    const surprise = document.createElement("div");
+                    surprise.id = "surprise";
+                    surprise.innerHTML = `<h2>🎉 Překvapení! 🎉</h2><p>${reward.message}</p><img src="${reward.icon}" width="250" alt="Surprise GIF">`;
+                    document.body.appendChild(surprise);
+                } else if (reward.type === 'idea') {
+                    showRewardModal(reward.title, reward.message, reward.icon);
+                } else if (reward.type === 'coins') {
+                    coins += reward.value;
+                    updateCoinsDisplay();
+                    showRewardModal('Odměna!', reward.message, reward.icon);
+                } else if (reward.type === 'all_boost') {
+                    clickPower *= (1 + reward.value);
+                    autoClickPower *= (1 + reward.value);
+                    showRewardModal('Odměna!', reward.message, reward.icon);
+                }
+                claimedMajorMilestones[reward.id] = true;
+                playSound('reward'); // Use 'reward' for the sound type
+            }
+        });
+    }
+
+    // Kontrola opakovatelných drobných odměn (každých 1000 kliků)
+    function checkMinorRepeatableRewards() {
+        const currentThreshold = Math.floor(score / 1000) * 1000;
+        if (currentThreshold > lastMinorRewardThreshold) {
+            for (let t = lastMinorRewardThreshold + 1000; t <= currentThreshold; t += 1000) {
+                const randomIndex = Math.floor(Math.random() * minorRepeatableRewards.length);
+                const reward = minorRepeatableRewards[randomIndex];
+
+                let rewardMessage = reward.message;
+                if (reward.type === 'click_power') clickPower += reward.value;
+                else if (reward.type === 'auto_power') autoClickPower += reward.value;
+                else if (reward.type === 'coins') coins += reward.value;
+                else if (reward.type === 'click_multiplier') clickPower *= (1 + reward.value);
+                else if (reward.type === 'auto_multiplier') autoClickPower *= (1 + reward.value);
+                else if (reward.type === 'crit_chance') critChance = Math.min(0.99, critChance + reward.value);
+                else if (reward.type === 'crit_damage') critDamageMultiplier += reward.value;
+
+                updateScore();
+                playSound('reward'); // Use 'reward' for the sound type
+                document.getElementById("message").innerText = `Odměna: ${rewardMessage}`;
+                setTimeout(() => { document.getElementById("message").innerText = ""; }, 3000);
+            }
+            lastMinorRewardThreshold = currentThreshold;
+        }
+    }
+
+    // Game End Function
+    function endGame() {
+        if (score < gameEndScore) return; // Only trigger if score is actually at or above the end score
+
+        // Stop all game intervals
+        clearInterval(autoClickIntervalId);
+        clearInterval(memeIntervalId);
+        clearInterval(passiveCoinIntervalId);
+        clearInterval(luckyWheelCheckIntervalId);
+        if (scoreBoostIntervalId) clearInterval(scoreBoostIntervalId);
+
+        // Disable game interactions
+        document.getElementById('mainClicker').onclick = null;
+        document.getElementById('exchangeCoinsBtn').onclick = null;
+        document.getElementById('treasureChestBtn').onclick = null;
+        document.querySelectorAll('.upgrade-card').forEach(card => card.onclick = null);
+
+        // Show game end modal
+        document.getElementById('gameEndModal').style.display = 'flex';
+        playSound('reward'); // Play a celebratory sound
+    }
+
+
+    // Score Boost Event Functions
+    function startScoreBoost(durationMinutes) {
+        if (scoreBoostEndTime > Date.now()) return; // Don't start if already active
+
+        scoreMultiplier = 2;
+        scoreBoostEndTime = Date.now() + durationMinutes * 60 * 1000;
+        
+        const boostMessageElement = document.getElementById('scoreBoostMessage');
+        boostMessageElement.style.display = 'block';
+
+        if (scoreBoostIntervalId) clearInterval(scoreBoostIntervalId);
+        scoreBoostIntervalId = setInterval(() => {
+            updateScoreBoostMessage();
+            if (Date.now() >= scoreBoostEndTime) {
+                scoreMultiplier = 1;
+                boostMessageElement.style.display = 'none';
+                clearInterval(scoreBoostIntervalId);
+                scoreBoostIntervalId = null;
+                showRewardModal('Bonus vypršel!', 'Bonus 2x skóre vypršel.', 'https://placehold.co/60x60/e74c3c/FFFFFF?text=TIME');
+            }
+        }, 1000);
+        showRewardModal('Bonus aktivní!', `2x SKÓRE AKTIVNÍ na ${durationMinutes} minut!`, 'https://placehold.co/60x60/2ecc71/FFFFFF?text=2X');
+    }
+
+    function updateScoreBoostMessage() {
+        const boostMessageElement = document.getElementById('scoreBoostMessage');
+        if (scoreBoostEndTime > Date.now()) {
+            const remainingSeconds = Math.floor((scoreBoostEndTime - Date.now()) / 1000);
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            boostMessageElement.innerText = `2x SKÓRE AKTIVNÍ! Zbývá: ${minutes}m ${seconds}s`;
+            boostMessageElement.style.display = 'block';
+        } else {
+            boostMessageElement.style.display = 'none';
+        }
+    }
+
+    function checkScoreBoostEvent() {
+        // 0.5% chance to trigger a 2x score boost if no boost is active
+        if (scoreBoostEndTime <= Date.now() && Math.random() < 0.005) {
+            const randomDuration = Math.floor(Math.random() * 5) + 1; // 1 to 5 minutes
+            startScoreBoost(randomDuration);
+        }
+    }
+
+
+    // Lucky Wheel Functions
+    function showLuckyWheelPrompt() {
+        const luckyWheelModal = document.getElementById('luckyWheelModal');
+        const spinWheelBtn = document.getElementById('spinWheelBtn');
+        const luckyWheelCountdown = document.getElementById('luckyWheelCountdown');
+
+        const now = Date.now();
+        const timeSinceLastSpin = now - lastSpinTime;
+
+        if (timeSinceLastSpin >= luckyWheelCooldown) {
+            luckyWheelModal.style.display = 'flex';
+            spinWheelBtn.onclick = spinLuckyWheel;
+            luckyWheelCountdown.innerText = "";
+        } else {
+            // Update countdown if modal is already open (e.g. from previous spin)
+            if (luckyWheelModal.style.display === 'flex') {
+                updateLuckyWheelCountdown();
+            }
+        }
+    }
+
+    function updateLuckyWheelCountdown() {
+        const luckyWheelCountdown = document.getElementById('luckyWheelCountdown');
+        const now = Date.now();
+        const timeRemaining = luckyWheelCooldown - (now - lastSpinTime);
+
+        if (timeRemaining > 0) {
+            const minutes = Math.floor(timeRemaining / (60 * 1000));
+            const seconds = Math.floor((timeRemaining % (60 * 1000)) / 1000);
+            luckyWheelCountdown.innerText = `Další roztočení za: ${minutes}m ${seconds}s`;
+        } else {
+            luckyWheelCountdown.innerText = "Kolo štěstí je připraveno!";
+        }
+    }
+
+    function spinLuckyWheel() {
+        const luckyWheelModal = document.getElementById('luckyWheelModal');
+        luckyWheelModal.style.display = 'none'; // Hide the modal immediately
+
+        lastSpinTime = Date.now(); // Set last spin time
+        updateLuckyWheelCountdown(); // Start countdown display
+
+        const randomIndex = Math.floor(Math.random() * luckyWheelRewards.length);
+        const reward = luckyWheelRewards[randomIndex];
+
+        applyReward(reward.type, reward.value, reward.message, reward.icon);
+    }
+
+    // Treasure Chest Functions
+    function openTreasureChest() {
+        if (score < treasureChestCost) {
+            showRewardModal('Nedostatek kliků', `Potřebuješ ${treasureChestCost.toLocaleString()} kliků k otevření truhly.`, 'https://placehold.co/60x60/c0392b/FFFFFF?text=X');
+            return;
+        }
+
+        const now = Date.now();
+        const timeSinceLastOpen = now - lastChestOpenTime;
+
+        if (timeSinceLastOpen < treasureChestCooldown) {
+            const remainingSeconds = Math.floor((treasureChestCooldown - timeSinceLastOpen) / 1000);
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            showRewardModal('Truhla na cooldownu', `Truhlu můžeš otevřít za ${minutes}m ${seconds}s.`, 'https://placehold.co/60x60/607D8B/FFFFFF?text=⏳');
+            return;
+        }
+
+        score -= treasureChestCost;
+        lastChestOpenTime = now;
+        updateScore();
+        
+        const randomIndex = Math.floor(Math.random() * treasureChestRewards.length);
+        const reward = treasureChestRewards[randomIndex];
+
+        applyReward(reward.type, reward.value, reward.message, reward.icon);
+    }
+
+    // Generic function to apply rewards from lucky wheel/treasure chest
+    function applyReward(type, value, message, icon) {
+        if (type === 'free_upgrade') {
+            // Find a random upgrade that is not max level and not a premium upgrade
+            const availableUpgrades = upgrades.filter(u => u.level < (u.name.includes('Násobič') ? 5 : 20)); // Example: limit multiplier levels
+            if (availableUpgrades.length > 0) {
+                const randomUpgrade = availableUpgrades[Math.floor(Math.random() * availableUpgrades.length)];
+                randomUpgrade.level++;
+                applyUpgradeEffect(randomUpgrade);
+                updateUpgrades();
+                showRewardModal('Volné vylepšení!', `Získal jsi volnou úroveň pro ${randomUpgrade.name}!`, icon);
+            } else {
+                showRewardModal('Žádné volné vylepšení', 'Momentálně nemáš žádné dostupné vylepšení zdarma.', icon);
+            }
+        } else if (type === 'coins') {
+            coins += value;
+            updateCoinsDisplay();
+            showRewardModal('Odměna!', message, icon);
+        } else if (type === 'score') {
+            score += value;
+            updateScore();
+            showRewardModal('Odměna!', message, icon);
+        } else if (type === 'crit_chance') {
+            critChance = Math.min(0.99, critChance + value);
+            showRewardModal('Odměna!', message, icon);
+        } else if (type === 'auto_power') {
+            autoClickPower += value;
+            showRewardModal('Odměna!', message, icon);
+        } else if (type === 'click_multiplier') {
+            clickPower *= (1 + value);
+            showRewardModal('Odměna!', message, icon);
+        } else if (type === 'auto_multiplier') {
+            autoClickPower *= (1 + value);
+            showRewardModal('Odměna!', message, icon);
+        } else if (type === 'cost_reduction') {
+            costReductionPercentage = Math.min(0.9, costReductionPercentage + value);
+            showRewardModal('Odměna!', message, icon);
+        }
+        playSound('reward');
+    }
+
+
+    // Funkce pro přepínání záložek
+    function openTab(evt, tabName) {
+      let i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tab-content");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        tabcontent[i].classList.remove("active");
+      }
+      tablinks = document.getElementsByClassName("tab-button");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+      }
+      document.getElementById(tabName).style.display = "block";
+      document.getElementById(tabName).classList.add("active");
+
+      // Check if evt is null (when called programmatically)
+      if (evt) {
+        evt.currentTarget.classList.add("active");
+      } else {
+        // Find the button corresponding to tabName and add 'active' class
+        const buttons = document.getElementsByClassName("tab-button");
+        for (let j = 0; j < buttons.length; j++) {
+          // Check text content to find the correct button, adjusting for Czech text
+          const buttonText = buttons[j].textContent;
+          if ((tabName === 'normalUpgrades' && buttonText.includes('Vylepšení')) ||
+              (tabName === 'premiumUpgrades' && buttonText.includes('Prémium vylepšení')) ||
+              (tabName === 'petsUpgrades' && buttonText.includes('Mazlíčci'))) {
+            buttons[j].classList.add('active');
+            break;
+          }
+        }
+      }
+    }
+
+    // Passive coin generation interval
+    let passiveCoinIntervalId;
+    function startPassiveCoinGeneration() {
+        if (passiveCoinIntervalId) clearInterval(passiveCoinIntervalId);
+        passiveCoinIntervalId = setInterval(() => {
+            let totalPassiveCoins = 0;
+            premiumUpgrades.forEach(upgrade => {
+                if (upgrade.type === "passive_coin_gen" && upgrade.level > 0) {
+                    totalPassiveCoins += upgrade.value * upgrade.level;
+                }
+            });
+            // Add pet passive coin generation
+            pets.filter(p => p.purchased && p.abilityType === "random_coin_gen").forEach(p => {
+                if (Math.random() < 0.03) { // Small chance to trigger
+                    coins += p.abilityValue;
+                }
+            });
+
+            if (totalPassiveCoins > 0) {
+                coins += totalPassiveCoins;
+                updateCoinsDisplay();
+            }
+        }, 1000); // Every second
+    }
+
+    // Tutorial functions
+    function showTutorialPrompt() {
+        const tutorialModal = document.getElementById("tutorialModal");
+        const tutorialTitle = document.getElementById("tutorialTitle");
+        const tutorialText = document.getElementById("tutorialText");
+        const tutorialNextBtn = document.getElementById("tutorialNextBtn");
+        const skipTutorialBtn = document.getElementById("skipTutorialBtn");
+
+        tutorialTitle.innerText = "Chceš si zkusit tutorial?";
+        tutorialText.innerText = "Dozvíš se, jak hrát a využít všechny funkce hry. Můžeš ho kdykoli přeskočit.";
+        tutorialNextBtn.innerText = "Ano, chci tutorial!";
+        skipTutorialBtn.innerText = "Ne, chci hrát!";
+
+        tutorialNextBtn.onclick = () => {
+            currentTutorialStep = 0;
+            displayTutorialStep(currentTutorialStep);
+        };
+        skipTutorialBtn.onclick = () => {
+            tutorialModal.style.display = 'none';
+            startGame();
+        };
+
+        tutorialModal.style.display = 'flex';
+    }
+
+    function displayTutorialStep(stepIndex) {
+        const tutorialModal = document.getElementById("tutorialModal");
+        const tutorialTitle = document.getElementById("tutorialTitle");
+        const tutorialText = document.getElementById("tutorialText");
+        const tutorialNextBtn = document.getElementById("tutorialNextBtn");
+        const skipTutorialBtn = document.getElementById("skipTutorialBtn");
+
+        if (stepIndex < tutorialSteps.length) {
+            const step = tutorialSteps[stepIndex];
+            tutorialTitle.innerText = step.title;
+            tutorialText.innerText = step.text;
+
+            // Remove previous highlights
+            document.querySelectorAll('.tutorial-highlight').forEach(el => {
+                el.classList.remove('tutorial-highlight');
+                el.style.zIndex = ''; // Reset z-index
+                el.style.position = ''; // Reset position
+            });
+
+            // Add highlight for current step
+            if (step.highlightElementId) {
+                const elementToHighlight = document.getElementById(step.highlightElementId);
+                if (elementToHighlight) {
+                    elementToHighlight.classList.add('tutorial-highlight');
+                    // Ensure highlighted element is visible above modal content
+                    elementToHighlight.style.zIndex = '2200';
+                    elementToHighlight.style.position = 'relative'; // Needed for z-index to work
+                }
+            }
+
+            tutorialNextBtn.innerText = (stepIndex === tutorialSteps.length - 1) ? "Začít hrát!" : "Další";
+            tutorialNextBtn.onclick = () => {
+                if (stepIndex === tutorialSteps.length - 1) {
+                    tutorialModal.style.display = 'none';
+                    // Remove all highlights after tutorial ends
+                    document.querySelectorAll('.tutorial-highlight').forEach(el => {
+                        el.classList.remove('tutorial-highlight');
+                        el.style.zIndex = '';
+                        el.style.position = '';
+                    });
+                    startGame();
+                } else {
+                    currentTutorialStep++;
+                    displayTutorialStep(currentTutorialStep);
+                }
+            };
+            skipTutorialBtn.style.display = 'inline-block'; // Always show skip during tutorial steps
+        }
+    }
+
+    function startGame() {
+        initUpgrades();
+        initPremiumUpgrades();
+        initPets(); // Initialize pets on new game start
+        displayNickname();
+        updateLeaderboard();
+        memeIntervalId = setInterval(showRandomMeme, 5 * 60 * 1000);
+        startPassiveCoinGeneration();
+        luckyWheelCheckIntervalId = setInterval(showLuckyWheelPrompt, luckyWheelCooldown); // Start hourly check for lucky wheel
+        startAutoClickInterval(); // Start auto-click interval
+        updateScoreBoostMessage(); // Ensure message is updated if boost was active on load
+    }
+
+
+    // Automatické klikání každou sekundu
+    let autoClickIntervalId;
+    function startAutoClickInterval() {
+        if (autoClickIntervalId) clearInterval(autoClickIntervalId);
+        autoClickIntervalId = setInterval(() => {
+            score += autoClickPower * scoreMultiplier; // Apply score multiplier to auto-clicks
+            updateScore();
+            showMessage();
+            checkRewards();
+        }, 1000);
+    }
+
+
+    // Spustí hru po načtení celého DOM
+    document.addEventListener("DOMContentLoaded", () => {
+      const nicknameModal = document.getElementById("nicknameModal");
+      const nicknameInput = document.getElementById("nicknameInput");
+      const startGameButton = document.getElementById("startGameButton");
+
+      shuffledMemeImages = shuffleArray([...memeImages]);
+
+      const savedNickname = localStorage.getItem("tobiNickname");
+      if (savedNickname) {
+        nickname = savedNickname;
+        nicknameModal.style.display = 'none';
+        loadGame();
+        startGame(); // Call startGame to initialize intervals and apply loaded effects
+      } else {
+        nicknameModal.style.display = 'flex';
+        nicknameInput.focus();
+      }
+
+      startGameButton.addEventListener('click', () => {
+        const enteredNickname = nicknameInput.value.trim();
+        if (enteredNickname) {
+          nickname = enteredNickname;
+          localStorage.setItem("tobiNickname", nickname);
+          nicknameModal.style.display = 'none';
+          showTutorialPrompt(); // Show tutorial prompt after nickname
+        } else {
+          alert("Prosím, zadejte platnou přezdívku!");
+        }
+      });
+
+      nicknameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          startGameButton.click();
+        }
+      });
+
+      // Add a click listener to the document to initialize audio context
+      document.body.addEventListener('click', initializeAudioContext, { once: true });
+
+      displayNickname();
+      updateScore(); // Volání updateScore, které volá updateCoinsDisplay
